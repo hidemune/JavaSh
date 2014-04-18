@@ -30,7 +30,7 @@ JavaSh.ExecThread execTrd ;
 JavaSh.InputThread InputTrd ;
 JavaSh.ErrorThread ErrorTrd ;
 String mode = "";
-String filename = "";
+String filenameBk = "";
 int lastPos = 0;
 int execPos = 0;
 private ArrayList<Integer> escS;
@@ -844,7 +844,7 @@ public static boolean yomiageWebMode = false;
                 //ファイル編集モード
                 mode = "edit";
                 JavaSh.talk("編集モードに移行します。保存はコントロールエス、中止はコントロールエックスです。");
-                filename = "tmp.txt";
+                String filename = "tmp.txt";
                 try {
                     filename = cmdA[1];
                 } catch (Exception e) {
@@ -904,9 +904,9 @@ public static boolean yomiageWebMode = false;
         //押したキーを喋らせる
         talkKeyPressed(evt);
     }//GEN-LAST:event_textMainKeyPressed
-    private void editFile(String filename) {
+    private void editFile(String filenm) {
         textMain.setText("");
-        if (filename.equals("")) {
+        if (filenm.equals("")) {
             return;
         }
         String crlf = "\n";
@@ -914,11 +914,31 @@ public static boolean yomiageWebMode = false;
                 crlf = System.getProperty("line.separator");
         } catch(SecurityException e) {
         }
+        
+        //ファイルの存在チェック
+        File fl;
+        String fullPath = "";
+        if (filenm.substring(0, 1).equals("/")) {
+            //絶対パスとみなす
+            fullPath = filenm;
+        } else {
+            //相対パスとみなす
+            fullPath = JavaSh.pwd + "/" + filenm;
+        }
+        fl = new File(filenm);
+        if (!fl.exists()) {
+            fl = new File(fullPath);
+            if (!fl.exists()) {
+                JavaSh.talk("そのようなファイルはありません。中止はコントロールエックスです。");
+            }
+        }
+        filenameBk = fl.getAbsolutePath();
+        
         //ファイルの読み込み
         StringBuilder sb = new StringBuilder();
         try {
             BufferedReader br;
-            br = new BufferedReader(new InputStreamReader(new FileInputStream(filename), "UTF-8"));
+            br = new BufferedReader(new InputStreamReader(new FileInputStream(fl), "UTF-8"));
             // 最終行まで読み込む
             String line = "";
             while ((line = br.readLine()) != null) {
@@ -929,7 +949,7 @@ public static boolean yomiageWebMode = false;
         } catch (Exception e) {
             // BufferedReaderオブジェクトのクローズ時の例外捕捉
             e.printStackTrace();
-            JavaSh.talk("そのようなファイルはありません。中止はコントロールエックスです。");
+            
         }
         textMain.setText(sb.toString().trim() + crlf);
     }
@@ -938,7 +958,7 @@ public static boolean yomiageWebMode = false;
         
         //CSVの書き込み
         try {
-            File csv = new File(filename); // CSVデータファイル
+            File csv = new File(filenameBk); // CSVデータファイル
             //古いファイルのバックアップ
             if (csv.exists()) {
                 File fileB = new File(csv.getAbsolutePath() + "~");

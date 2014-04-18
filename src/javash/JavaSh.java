@@ -274,6 +274,7 @@ public static String[] url = new String[10];
                         }
                         pwd = dir.getAbsolutePath();
                     }
+                    frmT.append("以上です。\n");
                     frmT.setCaretPos(0);
                     return;
                 }
@@ -322,7 +323,7 @@ public static String[] url = new String[10];
                     isT.close();
                     //osT.close();
                     running = false;
-                    frmT.append("終了しました。\n");
+                    frmT.append("以上です。\n");
                 }
             //  System.out.println("戻り値：" + process.exitValue());
             } catch (Exception ex) {
