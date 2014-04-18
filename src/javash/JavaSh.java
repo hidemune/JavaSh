@@ -300,6 +300,7 @@ public static String[] url = new String[10];
             cmdT = cmd;
         }
         public void exec(String str) {
+            frmTerminal.yomiageWebMode = false;
             frmT.clear();
             String retLine = "";
             String msg = "";
@@ -347,6 +348,13 @@ public static String[] url = new String[10];
                     frmT.setCaretPos(0);
                     return;
                 } 
+                if (cmdarg[0].startsWith("http")) {
+                    // Web取得
+                    NetClass net = new NetClass();
+                    net.NetClass(cmdarg[0], frmT.getTextArea());
+                    return;
+                }
+                
                 if (cmdarg[0].equals("yahoo")) {
                     // Web取得
                     NetClass net = new NetClass();

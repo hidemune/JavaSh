@@ -10,15 +10,10 @@ import java.net.*;
 import java.io.*;
 import javax.swing.JTextArea;
 import javax.swing.JTextPane;
-import javax.swing.text.Document;
-import javax.swing.text.EditorKit;
 import javax.swing.text.Element;
-import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.StyledDocument;
-import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
-import javax.swing.text.html.parser.ParserDelegator;
 
 /**
  *
@@ -37,7 +32,7 @@ public class NetClass {
     */
     
   public void NetClass(String urls, JTextPane textP){
-
+      frmTerminal.yomiageWebMode = true;
     try{ //概ねの操作で例外処理が必要です。
        //URLを作成する
        URL url=new URL(urls);//URLを設定
@@ -110,7 +105,6 @@ public class NetClass {
             wk = urls;      //URLを設定
             url=new URL(wk);
             frmTerminal.urlDir = url.toString();
-            frmTerminal.urlDir = frmTerminal.urlDir.replaceFirst("/[a-zA-Z]+?\\.htm.*", "");
         } else {
             wk = frmTerminal.urlDir + "/" + urls;
         }
@@ -118,14 +112,16 @@ public class NetClass {
 //        if (!wk.startsWith("http")) {
 //            wk = "http://"  + wk;
 //        }
+        wk = ((wk.replaceAll("://", "___")).replaceAll("//", "/")).replaceAll("___", "://");
         url=new URL(wk);
+        frmTerminal.urlDir = wk.replaceFirst("/[a-zA-Z0-9_\\-]+?\\.html*", "");
         System.err.println("ToStr:" + url.toString());
         // URL接続
         HttpURLConnection connect = (HttpURLConnection)url.openConnection();//サイトに接続
           connect.setRequestMethod("GET");//プロトコルの設定
           InputStream in=connect.getInputStream();//ファイルを開く
           
-          StringBuilder sb = new StringBuilder();
+          StringBuilder sb = new StringBuilder("\n");
           // ネットからデータの読み込み
           String str;//ネットから読んだデータを保管する変数を宣言
           str=readString(in);//1行読み取り
@@ -142,7 +138,18 @@ public class NetClass {
               }
               if (str.indexOf("-->") >= 0) {
                   flg = false;
-                  str = str.replaceAll(".+?-->", "");
+                  str = str.replaceFirst(".+?-->", "");
+              }
+              /* タグの削除
+               * <!　から　> までの、全ての行を削除
+               */
+              
+              if (str.indexOf("<!") >= 0) {
+                  flg = true;
+              }
+              if ((flg) && (str.indexOf(">") >= 0)) {
+                  flg = false;
+                  str = str.replaceFirst(".+?>", "");
               }
               /* タグの削除
                * 1行中の、　<　から　> までを削除
@@ -153,7 +160,7 @@ public class NetClass {
               
               if ((!flg) && (!str.trim().equals(""))) {
                   sb.append(str);
-                  sb.append("\n");
+                  //sb.append("\n");
               }
               
               str=readString(in);//次を読み込む
@@ -200,6 +207,30 @@ public class NetClass {
                 if (arr[0].toLowerCase().equals("a")) {
                     mode = "a";
                 }
+                if (arr[0].toLowerCase().equals("br")) {
+                    mode = "br";
+                }
+                if (arr[0].toLowerCase().equals("b")) {
+                    mode = "br";
+                }
+                if (arr[0].toLowerCase().equals("li")) {
+                    mode = "br";
+                }
+                if (arr[0].toLowerCase().equals("td")) {
+                    mode = "br";
+                }
+                if (arr[0].toLowerCase().equals("tr")) {
+                    mode = "br";
+                }
+                if (arr[0].toLowerCase().equals("div")) {
+                    mode = "br";
+                }
+                if (arr[0].toLowerCase().equals("/div")) {
+                    mode = "br";
+                }
+                if (arr[0].toLowerCase().equals("span")) {
+                    mode = "br";
+                }
                 for (int j = 0; j < arr.length; j++) {
                   if ((mode.equals("href"))) {
                       System.err.println(wk);
@@ -228,8 +259,23 @@ public class NetClass {
               }
 
           }
+          if (c.equals("。")) {
+              mode = "maru";
+          }
+          if (c.equals("\n")) {
+              mode = "";
+          }
+          if (c.equals("\r")) {
+              mode = "";
+          }
           if (mode.equals("out")) {
             ret.append(c);
+          }
+          if (mode.equals("br")) {
+            ret.append('\n');
+          }
+          if (mode.equals("maru")) {
+            ret.append("。\n");
           }
           if (!url.equals("")) {
             ret.append("[" + url.replaceAll("[\"\']", "") + "]");
@@ -257,7 +303,13 @@ public class NetClass {
         }
         a=in.read();//次を読む
       }
-      return new String(b,0,l);//文字列に変換
+      String utf8 = new String(b,0,l);//文字列に変換
+      String sjis = new String(b,0,l, "Windows-31J");//文字列に変換
+      if (utf8.length() <= sjis.length()) {
+          return utf8;
+      } else {
+          return sjis;
+      }
     }catch(IOException e){
       //Errが出たら、表示してnull値を返す
       System.out.println("Err="+e);

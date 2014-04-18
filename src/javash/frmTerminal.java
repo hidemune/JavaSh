@@ -637,7 +637,7 @@ public static String urlDir = "";
             }
         });
 
-        Web.setText("Web");
+        Web.setText("青空文庫");
         Web.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 WebActionPerformed(evt);
@@ -708,6 +708,7 @@ public static String urlDir = "";
             }
             if (code == evt.VK_DOWN) {
                 JavaSh.talkNoWait("した");
+                /*
                 if (textMain.getCaretPosition() < talkLatPos) {
                     textMain.setCaretPosition(talkLatPos);
                     //その行の行頭
@@ -721,7 +722,7 @@ public static String urlDir = "";
                     if (rb != null) {
                         rb.keyPress(KeyEvent.VK_HOME);
                     }
-                }
+                }*/
             }
             if (code == evt.VK_LEFT) {
                 JavaSh.talkNoWait("ひだり");
@@ -746,7 +747,12 @@ public static String urlDir = "";
             JavaSh.talkNoWait("タブ");
         }
         //F1-F10 セット
-        JavaSh.linkConv(getLine());
+        boolean bk = frmTerminal.yomiageWebMode;
+        yomiageWebMode = false;
+        String str = getLine();
+        yomiageWebMode = bk;
+        JavaSh.linkConv(str);
+        
         if (code == evt.VK_F1) {
             JavaSh.talkNoWait("エフ1");
             String url = JavaSh.url[0];
@@ -844,10 +850,12 @@ public static String urlDir = "";
                 JavaSh.talkNoWait("スペース");
             }
         } else {
+            //選択行の読み上げ
             if (evt.getKeyCode() == evt.VK_ESCAPE) {
                 String line = getLine();
                 System.out.println(line);
                 JavaSh.talkNoWait(line);
+
             }
         }
         /*
@@ -1138,11 +1146,7 @@ public static String urlDir = "";
     private void WebActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_WebActionPerformed
         // Web取得
         NetClass net = new NetClass();
-        //frmHtml.setVisible(true);
-//        net.NetClass("http://www.google.co.jp/#q=%E6%97%A5%E6%9C%AC%E8%AA%9E+%E3%83%95%E3%82%A9%E3%83%B3%E3%83%88", frmHtml.getTextPane());
-//        net.NetClass("http://search.yahoo.co.jp/search?p=田中&search.x=1&fr=top_ga1_sa&tid=top_ga1_sa&ei=UTF-8&aq=&oq=", frmHtml.getTextPane());
-        net.NetClass("http://search.yahoo.co.jp/search?p=田中コンピューターサービス&search.x=1&fr=top_ga1_sa&tid=top_ga1_sa&ei=UTF-8&aq=&oq=", textMain);
-        //net.NetClass("http://tanaka-cs.co.jp", textMain);
+        net.NetClass("http://www.aozora.gr.jp/", textMain);
         
     }//GEN-LAST:event_WebActionPerformed
 
@@ -1193,7 +1197,6 @@ public static String urlDir = "";
     private void WebAboutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_WebAboutActionPerformed
         // Web取得
         NetClass net = new NetClass();
-        //net.NetClass("https://www.google.co.jp/#q=%E6%97%A5%E6%9C%AC%E8%AA%9E+%E3%83%95%E3%82%A9%E3%83%B3%E3%83%88", frmHtml.getTextPane());
         net.NetClass("http://tanaka-cs.co.jp/en", textMain);
         //frmHtml.setVisible(true);
     }//GEN-LAST:event_WebAboutActionPerformed
@@ -1257,8 +1260,20 @@ public static String urlDir = "";
         String cmd = "";
         try {
             cmd = textMain.getSelectedText().trim();
-            textMain.setSelectionStart(pos);
-            textMain.setSelectionEnd(pos);
+            //ネット検索中は次の行へ移動
+            if (frmTerminal.yomiageWebMode) {
+                textMain.setSelectionStart(ed);
+                textMain.setSelectionEnd(ed);
+                try {
+                    textMain.setSelectionStart(ed+1);
+                    textMain.setSelectionEnd(ed+1);
+                }catch (Exception e) {
+                    //何もしない
+                }
+            } else {
+                textMain.setSelectionStart(pos);
+                textMain.setSelectionEnd(pos);
+            }
         }catch (Exception e) {
             //何もしない
         }
