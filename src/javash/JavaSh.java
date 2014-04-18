@@ -163,15 +163,18 @@ public static String[] url = new String[10];
             System.out.println(str);
         }
         
-        //辞書の内容で置換
-        str = str.toLowerCase();
-        for (int i = 0; i < Dict.size(); i++) {
-            if (Dict.get(i).length >= 2) {
-//                System.out.println("0:" + Dict.get(i)[0]);
-//                System.out.println("1:" + Dict.get(i)[1]);
-                str = str.replaceAll(Dict.get(i)[0], Dict.get(i)[1]);
+        if (!frmT.englishFlg) {
+            //辞書の内容で置換
+            str = str.toLowerCase();
+            for (int i = 0; i < Dict.size(); i++) {
+                if (Dict.get(i).length >= 2) {
+    //                System.out.println("0:" + Dict.get(i)[0]);
+    //                System.out.println("1:" + Dict.get(i)[1]);
+                    str = str.replaceAll(Dict.get(i)[0], Dict.get(i)[1]);
+                }
             }
         }
+        
         //OpenJTalkインストール済みかチェック
         File file = new File(talkExec);
         if (!file.exists()){

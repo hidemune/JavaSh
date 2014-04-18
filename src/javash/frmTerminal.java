@@ -41,12 +41,15 @@ private int Pn2 = 0;
 private boolean uwagaki = true;
 private HtmlFrame frmHtml = new HtmlFrame();
 public static boolean yomiageWebMode = false;
+boolean englishFlg = false;
 
     /**
      * Creates new form frmTerminal
      */
     public frmTerminal() {
         initComponents();
+        
+        chkMenuEnglish.setSelected(englishFlg);
         
         //IME止めておく
         textMain.enableInputMethods(false);
@@ -470,6 +473,7 @@ public static boolean yomiageWebMode = false;
         jMenu4 = new javax.swing.JMenu();
         Web = new javax.swing.JMenuItem();
         WebAbout = new javax.swing.JMenuItem();
+        chkMenuEnglish = new javax.swing.JCheckBoxMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("JavaTerminal");
@@ -643,6 +647,14 @@ public static boolean yomiageWebMode = false;
             }
         });
         jMenu4.add(WebAbout);
+
+        chkMenuEnglish.setText("英語で話す");
+        chkMenuEnglish.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkMenuEnglishActionPerformed(evt);
+            }
+        });
+        jMenu4.add(chkMenuEnglish);
 
         jMenuBar1.add(jMenu4);
 
@@ -1096,7 +1108,7 @@ public static boolean yomiageWebMode = false;
         // Web取得
         NetClass net = new NetClass();
         //net.NetClass("https://www.google.co.jp/#q=%E6%97%A5%E6%9C%AC%E8%AA%9E+%E3%83%95%E3%82%A9%E3%83%B3%E3%83%88", frmHtml.getTextPane());
-        net.NetClass("http://tanaka-cs.co.jp", textMain);
+        net.NetClass("http://tanaka-cs.co.jp/en", textMain);
         //frmHtml.setVisible(true);
     }//GEN-LAST:event_WebAboutActionPerformed
 
@@ -1118,6 +1130,10 @@ public static boolean yomiageWebMode = false;
         }
         */
     }//GEN-LAST:event_textMainKeyTyped
+
+    private void chkMenuEnglishActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkMenuEnglishActionPerformed
+        englishFlg = chkMenuEnglish.isSelected();
+    }//GEN-LAST:event_chkMenuEnglishActionPerformed
     private String getLine() {
         int pos = textMain.getCaretPosition();
         String text = textMain.getText();
@@ -1195,6 +1211,7 @@ public static boolean yomiageWebMode = false;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem Web;
     private javax.swing.JMenuItem WebAbout;
+    private javax.swing.JCheckBoxMenuItem chkMenuEnglish;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenu jMenu3;
