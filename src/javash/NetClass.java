@@ -25,8 +25,7 @@ import javax.swing.text.html.parser.ParserDelegator;
  * @author hdm
  */
 public class NetClass {
-//private String urlC = "";
-//private JTextPane textPC= null;
+
 
     public NetClass() {
     }
@@ -93,9 +92,35 @@ public class NetClass {
       
     try{ //概ねの操作で例外処理が必要です。
        //URLを作成する
-       URL url=new URL(urls);//URLを設定
-
-         // URL接続
+       URL url = null;
+       String wk = "";
+       
+        System.err.println("urlDir:" + frmTerminal.urlDir);
+        System.err.println("urlpath:" + urls);
+        //ドメイン情報が含まれていたら保存
+        String[] dom = {"http:", "https:", "\\.co\\.jp", "\\.com"};
+        boolean flg = false;
+        for (int i = 0; i < dom.length; i++) {
+            if (urls.contains(dom[i])) {
+                flg = true;
+                break;
+            }
+        }
+        if (flg) {
+            wk = urls;      //URLを設定
+            url=new URL(wk);
+            frmTerminal.urlDir = url.toString();
+            frmTerminal.urlDir = frmTerminal.urlDir.replaceFirst("/[a-zA-Z]+?\\.htm.*", "");
+        } else {
+            wk = frmTerminal.urlDir + "/" + urls;
+        }
+        //http 付加
+//        if (!wk.startsWith("http")) {
+//            wk = "http://"  + wk;
+//        }
+        url=new URL(wk);
+        System.err.println("ToStr:" + url.toString());
+        // URL接続
         HttpURLConnection connect = (HttpURLConnection)url.openConnection();//サイトに接続
           connect.setRequestMethod("GET");//プロトコルの設定
           InputStream in=connect.getInputStream();//ファイルを開く
@@ -104,7 +129,7 @@ public class NetClass {
           // ネットからデータの読み込み
           String str;//ネットから読んだデータを保管する変数を宣言
           str=readString(in);//1行読み取り
-          boolean flg = false;
+          flg = false;
           while (str!=null) {//読み取りが成功していれば
               //System.out.println(str);
               
@@ -139,11 +164,11 @@ public class NetClass {
           connect.disconnect();//サイトの接続を切断
           
           textP.setText(sb.toString());
-          
+          textP.setCaretPosition(0);
           
     }catch(Exception e){
       //例外処理が発生したら、表示する
-      System.out.println("Err ="+e);
+      e.printStackTrace();
     }
   }
   
@@ -151,6 +176,7 @@ public class NetClass {
       StringBuilder ret = new StringBuilder();
       
       str = str.replaceAll("&nbsp;", " ");
+      str = str.replaceAll("&quot;", "'");
       
       String url = "";
       String mode = "out";

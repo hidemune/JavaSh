@@ -6,6 +6,8 @@
 
 package javash;
 
+import java.awt.AWTException;
+import java.awt.Robot;
 import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -16,8 +18,11 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import static javash.JavaSh.frmT;
 import javax.swing.InputMap;
+import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 
 /**
@@ -42,6 +47,8 @@ private boolean uwagaki = true;
 private HtmlFrame frmHtml = new HtmlFrame();
 public static boolean yomiageWebMode = false;
 boolean englishFlg = false;
+int talkLatPos = 0;
+public static String urlDir = "";
 
     /**
      * Creates new form frmTerminal
@@ -49,10 +56,11 @@ boolean englishFlg = false;
     public frmTerminal() {
         initComponents();
         
-        chkMenuEnglish.setSelected(englishFlg);
+        //chkMenuEnglish.setSelected(englishFlg);
         
         //IME止めておく
-        textMain.enableInputMethods(false);
+        //textMain.enableInputMethods(false);
+        
         //タブの動きを止める
         InputMap imputMap=textMain.getInputMap(textMain.WHEN_IN_FOCUSED_WINDOW);
         imputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_TAB,0), "none");
@@ -86,7 +94,9 @@ boolean englishFlg = false;
         
         //execTrd.start();          //SSHモードで動作
     }
-    
+    public JTextArea getTextArea() {
+        return textMain;
+    }
     public void setCaretPos(int pos) {
         textMain.setCaretPosition(pos);
     }
@@ -473,7 +483,7 @@ boolean englishFlg = false;
         jMenu4 = new javax.swing.JMenu();
         Web = new javax.swing.JMenuItem();
         WebAbout = new javax.swing.JMenuItem();
-        chkMenuEnglish = new javax.swing.JCheckBoxMenuItem();
+        WebJAbout = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("JavaTerminal");
@@ -640,7 +650,7 @@ boolean englishFlg = false;
         });
         jMenu4.add(Web);
 
-        WebAbout.setText("About...");
+        WebAbout.setText("英語ページサンプル");
         WebAbout.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 WebAboutActionPerformed(evt);
@@ -648,13 +658,13 @@ boolean englishFlg = false;
         });
         jMenu4.add(WebAbout);
 
-        chkMenuEnglish.setText("英語で話す");
-        chkMenuEnglish.addActionListener(new java.awt.event.ActionListener() {
+        WebJAbout.setText("日本語ページサンプル");
+        WebJAbout.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chkMenuEnglishActionPerformed(evt);
+                WebJAboutActionPerformed(evt);
             }
         });
-        jMenu4.add(chkMenuEnglish);
+        jMenu4.add(WebJAbout);
 
         jMenuBar1.add(jMenu4);
 
@@ -691,17 +701,34 @@ boolean englishFlg = false;
         } else {
             JavaSh.talkNoWait(key);
         }
-        if (code == evt.VK_UP) {
-            JavaSh.talkNoWait("うえ");
-        }
-        if (code == evt.VK_DOWN) {
-            JavaSh.talkNoWait("した");
-        }
-        if (code == evt.VK_LEFT) {
-            JavaSh.talkNoWait("ひだり");
-        }
-        if (code == evt.VK_RIGHT) {
-            JavaSh.talkNoWait("みぎ");
+        //カーソルキーは、シフトキーを押しているときは喋らせない
+        if ((evt.getModifiers() & KeyEvent.SHIFT_DOWN_MASK) != 0) {
+            if (code == evt.VK_UP) {
+                JavaSh.talkNoWait("うえ");
+            }
+            if (code == evt.VK_DOWN) {
+                JavaSh.talkNoWait("した");
+                if (textMain.getCaretPosition() < talkLatPos) {
+                    textMain.setCaretPosition(talkLatPos);
+                    //その行の行頭
+                    //HOMEキーをエミュレートしたい。
+                    Robot rb = null;
+                    try {
+                        rb = new Robot();
+                    } catch (AWTException ex) {
+                        Logger.getLogger(frmTerminal.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    if (rb != null) {
+                        rb.keyPress(KeyEvent.VK_HOME);
+                    }
+                }
+            }
+            if (code == evt.VK_LEFT) {
+                JavaSh.talkNoWait("ひだり");
+            }
+            if (code == evt.VK_RIGHT) {
+                JavaSh.talkNoWait("みぎ");
+            }
         }
         if (code == evt.VK_CONTROL) {
             JavaSh.talkNoWait("コントロール");
@@ -718,35 +745,78 @@ boolean englishFlg = false;
         if (code == evt.VK_TAB) {
             JavaSh.talkNoWait("タブ");
         }
+        //F1-F10 セット
+        JavaSh.linkConv(getLine());
         if (code == evt.VK_F1) {
             JavaSh.talkNoWait("エフ1");
+            String url = JavaSh.url[0];
+            System.err.println(url);
+            if (!url.equals("")) {
+                webAccess(url);
+            }
         }
         if (code == evt.VK_F2) {
             JavaSh.talkNoWait("エフ2");
+            String url = JavaSh.url[1];
+            if (!url.equals("")) {
+                webAccess(url);
+            }
         }
         if (code == evt.VK_F3) {
             JavaSh.talkNoWait("エフ3");
+            String url = JavaSh.url[2];
+            if (!url.equals("")) {
+                webAccess(url);
+            }
         }
         if (code == evt.VK_F4) {
             JavaSh.talkNoWait("エフ4");
+            String url = JavaSh.url[3];
+            if (!url.equals("")) {
+                webAccess(url);
+            }
         }
         if (code == evt.VK_F5) {
             JavaSh.talkNoWait("エフ5");
+            String url = JavaSh.url[4];
+            if (!url.equals("")) {
+                webAccess(url);
+            }
         }
         if (code == evt.VK_F6) {
             JavaSh.talkNoWait("エフ6");
+            String url = JavaSh.url[5];
+            if (!url.equals("")) {
+                webAccess(url);
+            }
         }
         if (code == evt.VK_F7) {
             JavaSh.talkNoWait("エフ7");
+            String url = JavaSh.url[6];
+            if (!url.equals("")) {
+                webAccess(url);
+            }
         }
         if (code == evt.VK_F8) {
             JavaSh.talkNoWait("エフ8");
+            String url = JavaSh.url[7];
+            if (!url.equals("")) {
+                webAccess(url);
+            }
         }
         if (code == evt.VK_F9) {
             JavaSh.talkNoWait("エフ9");
+            String url = JavaSh.url[8];
+            if (!url.equals("")) {
+                webAccess(url);
+            }
         }
         if (code == evt.VK_F10) {
             JavaSh.talkNoWait("エフ10");
+            String url = JavaSh.url[9];
+            if (!url.equals("")) {
+                webAccess(url);
+            }
         }
         if (code == evt.VK_F11) {
             JavaSh.talkNoWait("エフ11");
@@ -754,6 +824,12 @@ boolean englishFlg = false;
         if (code == evt.VK_F12) {
             JavaSh.talkNoWait("エフ12");
         }
+    }
+    public void webAccess(String url) {
+        // Web取得
+        System.err.println("webAccess:" + url);
+        NetClass net = new NetClass();
+        net.NetClass(url, textMain);
     }
     private void textMainMyKeyEvent(java.awt.event.KeyEvent evt) {
 
@@ -774,7 +850,7 @@ boolean englishFlg = false;
                 JavaSh.talkNoWait(line);
             }
         }
-        
+        /*
         //選択範囲あれば(矢印キーを押した時のみ)
         if ((keyCode == evt.VK_LEFT) || (keyCode == evt.VK_RIGHT)) {
             String sel = textMain.getSelectedText();
@@ -785,7 +861,7 @@ boolean englishFlg = false;
                 }
             }
         }
-        
+        */
         //チュートリアルモード抜けるかチェック
         if (execTrd.tutorial) {
             if (keyCode == evt.VK_ENTER) {
@@ -1000,7 +1076,17 @@ boolean englishFlg = false;
     }//GEN-LAST:event_formWindowClosing
 
     private void textMainKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textMainKeyReleased
-
+       //選択範囲あれば(矢印キーを押した時のみ)
+        int keyCode = evt.getKeyCode();
+        if ((keyCode == evt.VK_LEFT) || (keyCode == evt.VK_RIGHT) || (keyCode == evt.VK_UP) || (keyCode == evt.VK_DOWN)) {
+            String sel = textMain.getSelectedText();
+            if (sel != null) {
+                if (!sel.equals("")) {
+                    JavaSh.talkNoWait(sel);
+                    //return;
+                }
+            }
+        } 
     }//GEN-LAST:event_textMainKeyReleased
 
     private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
@@ -1131,9 +1217,13 @@ boolean englishFlg = false;
         */
     }//GEN-LAST:event_textMainKeyTyped
 
-    private void chkMenuEnglishActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkMenuEnglishActionPerformed
-        englishFlg = chkMenuEnglish.isSelected();
-    }//GEN-LAST:event_chkMenuEnglishActionPerformed
+    private void WebJAboutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_WebJAboutActionPerformed
+        // Web取得
+        NetClass net = new NetClass();
+        //net.NetClass("https://www.google.co.jp/#q=%E6%97%A5%E6%9C%AC%E8%AA%9E+%E3%83%95%E3%82%A9%E3%83%B3%E3%83%88", frmHtml.getTextPane());
+        net.NetClass("http://tanaka-cs.co.jp/aisatu.html", textMain);
+        //frmHtml.setVisible(true);
+    }//GEN-LAST:event_WebJAboutActionPerformed
     private String getLine() {
         int pos = textMain.getCaretPosition();
         String text = textMain.getText();
@@ -1153,9 +1243,11 @@ boolean englishFlg = false;
         for (ed = pos; ed < textMain.getText().length(); ed++) {
             char ch = text.charAt(ed);
             if (ch == '\r') {
+                talkLatPos = ed;
                 break;
             }
             if (ch == '\n') {
+                talkLatPos = ed;
                 break;
             }
         }
@@ -1211,7 +1303,7 @@ boolean englishFlg = false;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem Web;
     private javax.swing.JMenuItem WebAbout;
-    private javax.swing.JCheckBoxMenuItem chkMenuEnglish;
+    private javax.swing.JMenuItem WebJAbout;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenu jMenu3;

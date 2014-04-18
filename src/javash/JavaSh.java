@@ -35,6 +35,9 @@ public static frmTerminal frmT = new frmTerminal();
 public static String talkExecIn ;
 public static String talkExec ;
 public static String talkSh ;
+public static String talkEnExecIn ;
+public static String talkEnExec ;
+public static String talkEnSh ;
 public static String user ;
 //public static boolean terminate = false;
 public static ArrayList<String[]> Dict = new ArrayList<String[]>();
@@ -58,6 +61,9 @@ public static String[] url = new String[10];
         talkExecIn = config.getProperty("talkExec", "/usr/local/bin/open_jtalk");
         talkExec = config.getProperty("talkExec", "/usr/local/bin/open_jtalk");
         talkSh = config.getProperty("talkSh", "./talk.sh");
+        talkEnExecIn = config.getProperty("talkEnExec", "/usr/local/bin/flite_hts_engine");
+        talkEnExec = config.getProperty("talkEnExec", "/usr/local/bin/flite_hts_engine");
+        talkEnSh = config.getProperty("talkEnSh", "./talkEn.sh");
         user = config.getProperty("user", "xxxx");
         pwd = "/home/" + user;
         
@@ -78,10 +84,12 @@ public static String[] url = new String[10];
         
         config.setProperty("talkExec", talkExecIn);
         config.setProperty("talkSh", talkSh);
+        config.setProperty("talkEnExec", talkEnExecIn);
+        config.setProperty("talkEnSh", talkEnSh);
         config.setProperty("user", user);
         
         try {
-            config.store(new OutputStreamWriter(new FileOutputStream("JavaSh.properties"),"UTF-8"), "by HDM");
+            config.store(new OutputStreamWriter(new FileOutputStream("JavaSh.properties"),"UTF-8"), "by TANAKA Hidemune");
         }catch(Exception e){
             e.printStackTrace();
         }
@@ -130,6 +138,26 @@ public static String[] url = new String[10];
             e.printStackTrace();
         }
     }
+    public static String linkConv(String str) {
+        if (frmTerminal.yomiageWebMode) {
+            //URL省略
+            Pattern pattern3 = Pattern.compile("\\[.+?\\]");
+            
+            for (int j = 0; j < 10; j++) {
+                Matcher matcherL = pattern3.matcher(str);
+                if (matcherL.find()) {
+                    String link = matcherL.group(0);
+                    url[j] = link.replaceAll("\\[", "").replaceAll("\\]", "");
+                    System.err.println(url[j]);
+                    str = matcherL.replaceFirst(" F" + (j+1) + " Link ");
+                } else {
+                    //url[j] = "";
+                }
+            }
+            System.out.println(str);
+        }
+        return str;
+    }
     public static void talkNoWait(String str) {
         talk(str, false);
     }
@@ -145,22 +173,13 @@ public static String[] url = new String[10];
         if (str.trim().equals("")) {
             return;
         }
-        if (frmTerminal.yomiageWebMode) {
-            //URL省略
-            Pattern pattern3 = Pattern.compile("\\[.+?\\]");
-            
-            for (int j = 0; j < 10; j++) {
-                Matcher matcherL = pattern3.matcher(str);
-                if (matcherL.find()) {
-                    String link = matcherL.group(0);
-                    url[j] = link.replaceAll("\\[", "").replaceAll("\\]", "");
-                    System.err.println(url[j]);
-                    str = matcherL.replaceFirst(" エフ" + (j+1) + "はリンク ");
-                } else {
-                    url[j] = "";
-                }
-            }
-            System.out.println(str);
+        str = linkConv(str);
+        //言語判定
+        String sh = talkSh;
+        frmT.englishFlg = false;
+        if (isEnglish(str)) {
+            sh = talkEnSh;
+            frmT.englishFlg = true;
         }
         
         if (!frmT.englishFlg) {
@@ -182,13 +201,20 @@ public static String[] url = new String[10];
             talkExec = "";
             return;
         }
+        File file2 = new File(talkEnExec);
+        if (!file2.exists()){
+            frmT.append("flite_hts_engineがインストールされていません。\n音声出力がOFFに設定されます。\n");
+            talkEnExec = "";
+            return;
+        }
         
         //タイムスタンプ
         long now = System.currentTimeMillis();
         
         Runtime r = Runtime.getRuntime();
         try {
-            Process proc = r.exec(new String[] { talkSh, Long.toString(now), str });
+            System.err.println(sh + ":" + str);
+            Process proc = r.exec(new String[] { sh, Long.toString(now), str });
             //プロセス終了まで待ち
             if (wait) {
                 InputStream is = proc.getInputStream();
@@ -207,6 +233,46 @@ public static String[] url = new String[10];
         } catch (IOException ex) {
             Logger.getLogger(JavaSh.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+    private static boolean isEnglish(String str) {
+        int en = 0;
+        int jp = 0; 
+        for (int i = 0; i < str.length(); i++) {
+            if (isJapaneseChar(str.charAt(i))) {
+                jp = jp + 1;
+            } else {
+                en = en + 1;
+            }
+        }
+        if (jp >= 1) {
+            return false;
+        }
+        return true;
+    }
+    public static boolean isJapaneseChar(char c) {
+        if (c == '　') {
+            return false;
+        }
+        Character.UnicodeBlock unicodeBlock = Character.UnicodeBlock.of(c);
+
+        if (Character.UnicodeBlock.HIRAGANA.equals(unicodeBlock))
+            return true;
+
+        if (Character.UnicodeBlock.KATAKANA.equals(unicodeBlock))
+            return true;
+
+        if (Character.UnicodeBlock.HALFWIDTH_AND_FULLWIDTH_FORMS
+                .equals(unicodeBlock))
+            return true;
+
+        if (Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS.equals(unicodeBlock))
+            return true;
+
+        if (Character.UnicodeBlock.CJK_SYMBOLS_AND_PUNCTUATION
+                .equals(unicodeBlock))
+            return true;
+
+        return false;
     }
     public static void talk(String str) {
         talk(str, true);
@@ -279,6 +345,13 @@ public static String[] url = new String[10];
                     }
                     frmT.append("以上です。\n");
                     frmT.setCaretPos(0);
+                    return;
+                } 
+                if (cmdarg[0].equals("yahoo")) {
+                    // Web取得
+                    NetClass net = new NetClass();
+                    String para = cmdarg[1];
+                    net.NetClass("http://search.yahoo.co.jp/search?p=" + para + "&search.x=1&fr=top_ga1_sa&tid=top_ga1_sa&ei=UTF-8&aq=&oq=", frmT.getTextArea());
                     return;
                 }
                 
