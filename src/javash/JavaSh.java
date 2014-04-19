@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -291,22 +292,20 @@ public static String[] url = new String[10];
         InputStream esT;
         private String cmdT = "";
         private ProcessBuilder pb = null;
-        private Process process = null;
+        public Process process = null;
         
         public void run() {
-            //if (cmdT.equals("")) {
-            //    openSSH();
-            //} else {
-                exec(cmdT);
-            //}
-            cmdT = "";
+            exec(cmdT);
+            //cmdT = "";
         }
         public void setCmd(String cmd) {
             cmdT = cmd;
         }
+        public String getCmd() {
+            return cmdT;
+        }
         public void exec(String str) {
-            frmTerminal.yomiageWebMode = false;
-            frmT.clear();
+
             String retLine = "";
             String msg = "";
             str = str.trim();
@@ -320,6 +319,9 @@ public static String[] url = new String[10];
             try {
                 //組み込みコマンドはここに記述
                 if (cmdarg[0].equals("cd")) {
+                    //ここでエラーが出なかったら初めてクリア
+                    frmTerminal.yomiageWebMode = false;
+                    frmT.clear();
                     String path = pwd;
                     if (cmdarg.length > 1) {
                         String pathPara = cmdarg[1];
@@ -371,7 +373,7 @@ public static String[] url = new String[10];
                 //必要なエイリアス
                 String[] argAdd = {cmdarg[0]};  //Def
                 if (cmdarg[0].equals("ls")) {
-                    argAdd = new String[] {"ls", "-1", "-p"};
+                    argAdd = new String[] {"ls", "-1", "-p", "-b"};
                 }
                 
                 //size
@@ -390,6 +392,10 @@ public static String[] url = new String[10];
                 pb.directory(new File (pwd));
                 process = pb.start();
                 //process.waitFor();
+                
+                //ここでエラーが出なかったら初めてクリア
+                frmTerminal.yomiageWebMode = false;
+                frmT.clear();
                 
                 //StringBuilder sb = new StringBuilder();
                 isT = process.getInputStream();
@@ -410,11 +416,10 @@ public static String[] url = new String[10];
                 } finally {
                     br.close();
                     isT.close();
-                    //osT.close();
+                    osT.close();
                     running = false;
                     frmT.append("以上です。\n");
                 }
-            //  System.out.println("戻り値：" + process.exitValue());
             } catch (Exception ex) {
                 ex.printStackTrace();
                 talk("エラーです。");
@@ -426,66 +431,8 @@ public static String[] url = new String[10];
             }
             frmT.setCaretPos(0);
         }
-        /*
-        public void openSSH() {
-            if (running) {
-                return;
-            }
-            
-            //チュートリアル
-            JavaSh.talk("喋るターミナルソフトです。");
-            JavaSh.talk("キーボードを押して、それぞれのキーを確認してみて下さい。");
-            JavaSh.talkNoWait("その後、「L」「O」「G」「I」「N」「エンター」を順に押してログインしてください。");
-            frmT.editableReq(true);
-            frmT.sshTrd.tutorial = true;
-            
-            running = true;
-            try {
-                
-                //チュートリアル終了待ち
-                while (frmT.sshTrd.tutorial) {
-                    sleep(100);
-                }
-                JavaSh.talkNoWait("パスワードを入力してエンターを押してください。");
-                frmT.append("ログインを試みます。\n");
-                pb = new ProcessBuilder("ssh", "-t", "-t", user + "@localhost");
-                
-                frmT.editableReq(true);      //KeyPress取れない・・・
-                
-                process = pb.start();
-                esT = process.getErrorStream();
-                isT = process.getInputStream();
-                osT = process.getOutputStream();
-                
-                //frmT.InputTrd.start();    これは必要に応じて呼び出し
-                frmT.ErrorTrd.start();
-                
-                BufferedReader br = new BufferedReader(new InputStreamReader(isT));
-                try {
-                    char c = 0;
-                    while ((c = (char) br.read()) != 65535) {
-                        frmT.appendC(c);
-                        frmT.repaintReq();
-                    }
-                } finally {
-                    br.close();
-                    isT.close();
-                    osT.close();
-                    esT.close();
-                    running = false;
-                    frmT.append("ログアウトしました。\n");
-                    talk("ログアウトしました。\n");
-                }
-            } catch (Exception ex) {
-                talk("エラーです。");
-                frmT.append(ex.toString());
-                frmT.append("\n");
-                talk(ex.toString());
-                running = false;
-                ex.printStackTrace();
-            }
-        }*/
     }
+    
     static class InputThread extends Thread{
         private String cmdT = "";
         public void run() {
@@ -574,28 +521,25 @@ public static String[] url = new String[10];
         
         ArrayList al = new ArrayList();
         StringBuilder sb = new StringBuilder();
-        boolean flgQ = false;
-        boolean flgDQ = false;
+        boolean flgEsc = false;
         
         for (int i = 0; i < str.length(); i++) {
             String wk = str.substring(i, i + 1);
-            if (wk.equals("'")) {
-                flgQ = !flgQ;
-            }
-            if (wk.equals("\"")) {
-                flgDQ = !flgDQ;
-            }
-            if (wk.equals(" ")) {
-                if ((flgQ) || (flgDQ)) {
-                    //文字列は続く
+            if (wk.equals("\\")) {
+                flgEsc = true;
+            } else {
+                if (flgEsc) {
                     sb.append(wk);
                 } else {
-                    //分割
-                    al.add(sb.toString());
-                    sb = new StringBuilder();
+                    if (wk.equals(" ")) {
+                        //分割
+                        al.add(sb.toString());
+                        sb = new StringBuilder();
+                    } else {
+                        sb.append(wk);
+                    }
                 }
-            } else {
-                sb.append(wk);
+                flgEsc = false;
             }
         }
         al.add(sb.toString());

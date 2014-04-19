@@ -26,7 +26,6 @@ import javax.swing.KeyStroke;
  * @author hdm
  */
 public class frmTerminal extends javax.swing.JFrame {
-//JavaSh.ExecThread ExecTrd = new JavaSh.ExecThread();
 JavaSh.ExecThread execTrd ;
 JavaSh.InputThread InputTrd ;
 JavaSh.ErrorThread ErrorTrd ;
@@ -91,8 +90,6 @@ commandDialog cmdD = new commandDialog(this, true);
         execTrd = new JavaSh.ExecThread();
         InputTrd = new JavaSh.InputThread();
         ErrorTrd = new JavaSh.ErrorThread();
-        
-        //execTrd.start();          //SSHモードで動作
     }
     public JTextArea getTextArea() {
         return textMain;
@@ -756,6 +753,30 @@ commandDialog cmdD = new commandDialog(this, true);
                     }
                 }
             }
+            if (code == evt.VK_UP) {
+                if (yomiageWebMode) {
+                    //前のタグに移動
+                    int pos = textMain.getCaretPosition();
+                    String str = textMain.getText();
+                    int wk = str.lastIndexOf("\n", pos);
+                    wk = str.lastIndexOf("[[[", wk);
+                    
+                    if (wk >= 0) {
+                        textMain.setCaretPosition(wk);
+                        yomiageWebMode = false; //カーソルの制御を止める
+                        String line = getLine();
+                        yomiageWebMode = true; //戻す
+                        //System.out.println(line);
+                        JavaSh.talkNoWait(line);
+                    } else {
+                        JavaSh.talkNoWait("以上です。");
+                        //textMain.setSelectionEnd(textMain.getText().length());
+                        //textMain.setSelectionStart(textMain.getText().length());
+                        textMain.setCaretPosition(0);
+                        evt.consume();
+                    }
+                }
+            }
         }
         if (code == evt.VK_CONTROL) {
             JavaSh.talkNoWait("コントロール");
@@ -875,7 +896,7 @@ commandDialog cmdD = new commandDialog(this, true);
         System.err.println("textMainMyKeyEvent:" + keyCode);
         
         //チュートリアル専用メッセージ
-        if (execTrd.tutorial) {
+        if (false) {
             if (keyCode == evt.VK_ESCAPE) {
                 JavaSh.talkNoWait("エスケープ。これを押して、カーソルのある行の内容を読み上げます。");
             }
@@ -895,24 +916,7 @@ commandDialog cmdD = new commandDialog(this, true);
                 }
             }
         }
-        //チュートリアルモード抜けるかチェック
-        if (execTrd.tutorial) {
-            if (keyCode == evt.VK_ENTER) {
-                String cmd = getLine();
-                if (cmd.toLowerCase().trim().endsWith("login")) {
-                    System.out.println("login...");
-                    execTrd.tutorial = false;
-                    return;
-                }
-            }
-        }
         
-        //チュートリアル中に、以降のコードを実行しないように。
-        if (execTrd.tutorial) {
-            return;
-        }
-        
-        //ログアウト後は、ここを通る
         if (evt.getKeyCode() == evt.VK_ENTER) {
             //編集中は何もしない
             if (mode.equals("edit")) {
@@ -954,29 +958,38 @@ commandDialog cmdD = new commandDialog(this, true);
                 evt.consume();  //キー入力をなかったことにする
                 return;
             }
-
-            evt.consume();  //キー入力をなかったことにする
             
-            //execTrd.setCmd(cmd);
-            execTrd.exec(cmd);
-            
+            //コマンド実行 ウェブモードの時にどうするか
+            if (!cmd.trim().equals("")) {
+                JavaSh.ExecThread execTrd = new JavaSh.ExecThread();
+                execTrd.setCmd(cmd);
+                execTrd.start();
+            }
             return;
         }
         if (((evt.getModifiers() & InputEvent.CTRL_MASK) != 0) && (evt.getKeyCode() == evt.VK_X)) {
-            if (execTrd.running) {
-                textMain.setText(mode);
+      /*      if (execTrd.running) {
+                textMain.setText("\n" + execTrd.getCmd());
                 append("強制終了\n");
                 JavaSh.talk("強制終了");
                 mode = "";
                 execTrd.running = false;
-                execTrd.stop();     
-            } else {
+                execTrd.process.destroy();
+                try {
+                    execTrd.process.waitFor();
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(frmTerminal.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                execTrd = null;
+                setLineNo(0);
+            } else { */
                 textMain.setText(mode);
                 append("\n");
                 append("強制終了\n");
                 JavaSh.talk("強制終了");
                 mode = "";
-            }
+                setLineNo(0);
+       //     }
         }
         if (((evt.getModifiers() & InputEvent.CTRL_MASK) != 0) && (evt.getKeyCode() == evt.VK_S)) {
             if (mode.equals("edit")) {
@@ -1279,8 +1292,10 @@ commandDialog cmdD = new commandDialog(this, true);
                     //何もしない
                 }
             } else { */
-                textMain.setSelectionStart(pos);
-                textMain.setSelectionEnd(pos);
+                textMain.setSelectionStart(sta);
+                textMain.setSelectionEnd(sta);
+                textMain.setSelectionStart(sta + 1);
+                textMain.setSelectionEnd(sta + 1);
             //}
         }catch (Exception e) {
             //何もしない
