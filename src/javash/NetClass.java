@@ -20,7 +20,8 @@ import javax.swing.text.html.HTMLEditorKit;
  * @author hdm
  */
 public class NetClass {
-
+    String mode = "out";
+    String rangemode = "out";
 
     public NetClass() {
     }
@@ -32,6 +33,7 @@ public class NetClass {
     */
     
   public void NetClass(String urls, JTextPane textP){
+      //ここは未使用です
       frmTerminal.yomiageWebMode = true;
     try{ //概ねの操作で例外処理が必要です。
        //URLを作成する
@@ -105,17 +107,25 @@ public class NetClass {
             wk = urls;      //URLを設定
             url=new URL(wk);
             frmTerminal.urlDir = url.toString();
+            frmTerminal.urlRoot = url.getProtocol() + "://" + url.getHost();
         } else {
-            wk = frmTerminal.urlDir + "/" + urls;
+            //１文字目が/の場合、ルートからの絶対パス
+            if (urls.startsWith("/")) {
+                wk = frmTerminal.urlRoot + urls;
+            } else {
+                wk = frmTerminal.urlDir + "/" + urls;
+            }
         }
         //http 付加
 //        if (!wk.startsWith("http")) {
 //            wk = "http://"  + wk;
 //        }
-        wk = ((wk.replaceAll("://", "___")).replaceAll("//", "/")).replaceAll("___", "://");
+        //wk = ((wk.replaceAll("://", "___")).replaceAll("//", "/")).replaceAll("___", "://");
         url=new URL(wk);
         frmTerminal.urlDir = wk.replaceFirst("/[a-zA-Z0-9_\\-]+?\\.html*", "");
-        System.err.println("ToStr:" + url.toString());
+        frmTerminal.urlRireki.add(wk.toString());
+        
+        System.err.println("RirekiAdd:" + url.toString());
         // URL接続
         HttpURLConnection connect = (HttpURLConnection)url.openConnection();//サイトに接続
           connect.setRequestMethod("GET");//プロトコルの設定
@@ -127,38 +137,9 @@ public class NetClass {
           str=readString(in);//1行読み取り
           flg = false;
           while (str!=null) {//読み取りが成功していれば
-              //System.out.println(str);
+              System.out.println(str);
               
-              /* タグの削除
-               * <!--　から　--> までの、全ての行を削除
-               */
-              
-              if (str.indexOf("<!--") >= 0) {
-                  flg = true;
-              }
-              if (str.indexOf("-->") >= 0) {
-                  flg = false;
-                  str = str.replaceFirst(".+?-->", "");
-              }
-              /* タグの削除
-               * <!　から　> までの、全ての行を削除
-               */
-              
-              if (str.indexOf("<!") >= 0) {
-                  flg = true;
-              }
-              if ((flg) && (str.indexOf(">") >= 0)) {
-                  flg = false;
-                  str = str.replaceFirst(".+?>", "");
-              }
-              /* タグの削除
-               * 1行中の、　<　から　> までを削除
-               * 但し、Aタグだけはhref文字列を取得
-               */
-              
-              str = replaceTag(str);
-              
-              if ((!flg) && (!str.trim().equals(""))) {
+              if (!str.trim().equals("")) {
                   sb.append(str);
                   //sb.append("\n");
               }
@@ -170,9 +151,55 @@ public class NetClass {
           in.close();//InputStreamを閉じる
           connect.disconnect();//サイトの接続を切断
           
-          textP.setText(sb.toString());
-          textP.setCaretPosition(0);
-          
+        /* タグの削除
+         * 1行中の、　<　から　> までを削除
+         * 但し、Aタグだけはhref文字列を取得
+         */
+        /* タグの削除
+         * <!--　から　--> までの、全ての行を削除
+         */
+
+        str = null;
+        while (true) {
+            int sta = sb.toString().indexOf("<!--");
+            int ed = sb.toString().indexOf("-->", sta);
+            if ((0 <= sta) && (sta < ed)) {
+                sb.delete(sta, ed + 3);
+            } else {
+                break;
+            }
+        }
+        while (true) {
+            int sta = sb.toString().indexOf("<!");
+            int ed = sb.toString().indexOf(">", sta);
+            if ((0 <= sta) && (sta < ed)) {
+                sb.delete(sta, ed + 1);
+            } else {
+                break;
+            }
+        }
+        str = sb.toString();
+        str = replaceTag(str);
+        
+        //全行トリム
+        sb = new StringBuilder();
+        String[] strs = str.split("\n");
+        for (int i = 0; i < strs.length; i++) {
+            sb.append(strs[i].replaceAll(" +$",""));
+            sb.append("\n");
+        }
+        str = sb.toString();
+        
+        //丸で改行
+        str = str.replaceAll("。", "。\n");
+        //2つ以上の連続した改行は1つに設定
+        str = str.replaceAll("\r", "");
+        str = str.replaceAll("\n\n*", "\n");
+        
+        
+        textP.setText("\n" + str + "\n以上です。\n");
+        textP.setCaretPosition(0);
+        
     }catch(Exception e){
       //例外処理が発生したら、表示する
       e.printStackTrace();
@@ -182,13 +209,23 @@ public class NetClass {
   private String replaceTag(String str) {
       StringBuilder ret = new StringBuilder();
       
+      if (rangemode.equals("")) {
+        rangemode = "out";
+      }
+      if (mode.equals("")) {
+        mode = "out;";
+      }
+      
       str = str.replaceAll("&nbsp;", " ");
       str = str.replaceAll("&quot;", "'");
       
       String url = "";
-      String mode = "out";
+      
       for (int i = 0; i < str.length(); i++) {
           String c = str.substring(i, i + 1);
+          if (c.equals(">")) {
+              mode = "tagend";
+          }
           if (c.equals("<")) {
             try {
                 mode = "tag";
@@ -201,17 +238,42 @@ public class NetClass {
                     wk = str.substring(i, ed);
                 }
                 wk = wk.replaceFirst("<", "");
-                System.out.println(wk);
+                //System.out.println(wk);
                 String[] arr = wk.split("[\\s\\=]+");
-                System.err.println(arr[0]);
+                
                 if (arr[0].toLowerCase().equals("a")) {
                     mode = "a";
+                }
+                if (arr[0].toLowerCase().equals("/a")) {
+                    mode = "br";
                 }
                 if (arr[0].toLowerCase().equals("br")) {
                     mode = "br";
                 }
-                if (arr[0].toLowerCase().equals("b")) {
+                if (arr[0].toLowerCase().equals("p")) {
                     mode = "br";
+                }
+                if (arr[0].toLowerCase().equals("/p")) {
+                    mode = "br";
+                }
+                if (arr[0].toLowerCase().equals("td")) {
+                    mode = "br";
+                }
+                if (arr[0].toLowerCase().equals("tr")) {
+                    mode = "br";
+                }
+                if (arr[0].toLowerCase().equals("dt")) {
+                    mode = "br";
+                }
+                if (arr[0].toLowerCase().equals("dd")) {
+                    mode = "br";
+                }
+                //b は、ただの大文字指定 何もしない
+                if (arr[0].toLowerCase().equals("b")) {
+                    mode = "tagend";
+                }
+                if (arr[0].toLowerCase().equals("/b")) {
+                    mode = "tagend";
                 }
                 if (arr[0].toLowerCase().equals("li")) {
                     mode = "br";
@@ -231,6 +293,24 @@ public class NetClass {
                 if (arr[0].toLowerCase().equals("span")) {
                     mode = "br";
                 }
+                if (arr[0].toLowerCase().equals("style")) {
+                    rangemode = "del";
+                }
+                if (arr[0].toLowerCase().equals("/style")) {
+                    rangemode = "out";
+                }
+                if (arr[0].toLowerCase().equals("script")) {
+                    rangemode = "del";
+                }
+                if (arr[0].toLowerCase().equals("/script")) {
+                    rangemode = "out";
+                }
+                if (arr[0].toLowerCase().equals("title")) {
+                    rangemode = "get";
+                }
+                if (arr[0].toLowerCase().equals("/title")) {
+                    rangemode = "out";
+                }
                 for (int j = 0; j < arr.length; j++) {
                   if ((mode.equals("href"))) {
                       System.err.println(wk);
@@ -247,13 +327,17 @@ public class NetClass {
                       }
                       url = wk.substring(staH, endH);
                       url = url.replaceFirst("=", "");
-                      mode = "";
+                      mode = "tagend";
                   }
                   if ((mode.equals("a")) && (arr[j].toLowerCase().equals("href"))) {
                       mode = "href";
                   }
                 }
                 i = ed;
+                if (mode.equals("tag")) {
+                    System.err.println("未処理？：" + arr[0]);
+                    mode = "tagend";
+                }
               } catch (Exception e) {
                   e.printStackTrace();
               }
@@ -268,19 +352,39 @@ public class NetClass {
           if (c.equals("\r")) {
               mode = "";
           }
-          if (mode.equals("out")) {
+          //出力処理
+          if (!c.equals("<") && (rangemode.equals("get"))) {
             ret.append(c);
+            mode = "out";
+          }
+          if ((rangemode.equals("out")) && (mode.equals("out"))) {
+            ret.append(c);
+          }
+          
+          //タグの終了が観測できたら元に戻す
+          if (mode.equals("tagend")) {
+            mode = "out";
+          }
+          if (rangemode.equals("getend")) {
+            //モードを戻さないといけない
+            rangemode = "out";
+            mode = "out";
           }
           if (mode.equals("br")) {
             ret.append('\n');
+            mode = "out";
           }
           if (mode.equals("maru")) {
-            ret.append("。\n");
+            ret.append("。");       //丸で改行するか悩む
+            mode = "out";
           }
           if (!url.equals("")) {
-            ret.append("[" + url.replaceAll("[\"\']", "") + "]");
+            ret.append("[[[" + url.replaceAll("[\"\']", "") + "]]]");
           }
-          mode = "out";
+          if (rangemode.equals("out")) {
+              //範囲指定の条件が無ければ出力モードに
+              mode = "out";
+          }
           url = "";
       }
       

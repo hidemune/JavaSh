@@ -141,15 +141,15 @@ public static String[] url = new String[10];
     public static String linkConv(String str) {
         if (frmTerminal.yomiageWebMode) {
             //URL省略
-            Pattern pattern3 = Pattern.compile("\\[.+?\\]");
+            Pattern pattern3 = Pattern.compile("\\[\\[\\[.+?\\]\\]\\]");
             
             for (int j = 0; j < 10; j++) {
                 Matcher matcherL = pattern3.matcher(str);
                 if (matcherL.find()) {
                     String link = matcherL.group(0);
-                    url[j] = link.replaceAll("\\[", "").replaceAll("\\]", "");
+                    url[j] = link.replaceAll("\\[\\[\\[", "").replaceAll("\\]\\]\\]", "");
                     System.err.println(url[j]);
-                    str = matcherL.replaceFirst(" F" + (j+1) + " Link ");
+                    str = matcherL.replaceFirst(" F" + (j+1) + "Link ");
                 } else {
                     //url[j] = "";
                 }

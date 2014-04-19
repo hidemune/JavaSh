@@ -6,8 +6,7 @@
 
 package javash;
 
-import java.awt.AWTException;
-import java.awt.Robot;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -18,9 +17,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import static javash.JavaSh.frmT;
 import javax.swing.InputMap;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
@@ -49,6 +45,8 @@ public static boolean yomiageWebMode = false;
 boolean englishFlg = false;
 int talkLatPos = 0;
 public static String urlDir = "";
+public static String urlRoot = "";
+public static ArrayList<String> urlRireki = new ArrayList<String>();
 
     /**
      * Creates new form frmTerminal
@@ -702,7 +700,7 @@ public static String urlDir = "";
             JavaSh.talkNoWait(key);
         }
         //カーソルキーは、シフトキーを押しているときは喋らせない
-        if ((evt.getModifiers() & KeyEvent.SHIFT_DOWN_MASK) != 0) {
+        if (((evt.getModifiers() & InputEvent.CTRL_MASK) == 0) && ((evt.getModifiers() & InputEvent.SHIFT_MASK) == 0)) {
             if (code == evt.VK_UP) {
                 JavaSh.talkNoWait("うえ");
             }
@@ -729,6 +727,53 @@ public static String urlDir = "";
             }
             if (code == evt.VK_RIGHT) {
                 JavaSh.talkNoWait("みぎ");
+            }
+        } 
+        
+        if ((evt.getModifiers() & InputEvent.CTRL_MASK) != 0) {
+            if (code == evt.VK_LEFT) {
+                if (yomiageWebMode) {
+                    if (urlRireki.size() <= 1) {
+                        JavaSh.talkNoWait("ページの履歴がありません。");
+                        return;
+                    }
+                    JavaSh.talkNoWait("前のページに移動します。");
+                    try {
+                        urlRireki.remove(urlRireki.size()-1);
+                        String url = urlRireki.get(urlRireki.size()-1);
+                        System.err.println("前のページ：" + url);
+                        urlRireki.remove(urlRireki.size()-1);
+                        if (!url.equals("")) {
+                            webAccess(url);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            if (code == evt.VK_DOWN) {
+                if (yomiageWebMode) {
+                    //次のタグに移動
+                    int pos = textMain.getCaretPosition();
+                    String str = textMain.getText();
+                    int wk = str.indexOf("\n", pos);
+                    wk = str.indexOf("[[[", wk);
+                    
+                    if (wk > 0) {
+                        textMain.setCaretPosition(wk);
+                        yomiageWebMode = false; //カーソルの制御を止める
+                        String line = getLine();
+                        yomiageWebMode = true; //戻す
+                        //System.out.println(line);
+                        JavaSh.talkNoWait(line);
+                    } else {
+                        JavaSh.talkNoWait("以上です。");
+                        //textMain.setSelectionEnd(textMain.getText().length());
+                        //textMain.setSelectionStart(textMain.getText().length());
+                        textMain.setCaretPosition(textMain.getText().length());
+                        evt.consume();
+                    }
+                }
             }
         }
         if (code == evt.VK_CONTROL) {
@@ -1254,7 +1299,15 @@ public static String urlDir = "";
                 break;
             }
         }
-        
+        //ファイル先頭で改行がいきなり来た場合
+        //ネット検索中は次の行へ移動
+        if (frmTerminal.yomiageWebMode) {
+            if ((sta <= 0) && (ed <= 0)) {
+                textMain.setSelectionStart(1);
+                textMain.setSelectionEnd(1);
+                return "";
+            }
+        }
         textMain.setSelectionStart(sta);
         textMain.setSelectionEnd(ed);
         String cmd = "";
