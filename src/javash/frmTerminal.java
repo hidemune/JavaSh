@@ -40,19 +40,21 @@ private int Pn = 0;
 private int Pn2 = 0;
 //PrintWriter bwC;
 private boolean uwagaki = true;
-private HtmlFrame frmHtml = new HtmlFrame();
 public static boolean yomiageWebMode = false;
 boolean englishFlg = false;
 int talkLatPos = 0;
 public static String urlDir = "";
 public static String urlRoot = "";
 public static ArrayList<String> urlRireki = new ArrayList<String>();
+public static int linkLanstLineNo = 0;
+commandDialog cmdD = new commandDialog(this, true);
 
     /**
      * Creates new form frmTerminal
      */
     public frmTerminal() {
         initComponents();
+        cmdD.setMainFrm(this);
         
         //chkMenuEnglish.setSelected(englishFlg);
         
@@ -141,7 +143,7 @@ public static ArrayList<String> urlRireki = new ArrayList<String>();
         }
         textMain.setText(sb.toString());
     }
-    private void setPos(int y) {
+    private void setLineNo(int y) {
         int row = 0;
         String str = textMain.getText();
         //行番号を無理やり数える
@@ -156,14 +158,8 @@ public static ArrayList<String> urlRireki = new ArrayList<String>();
             }
         }
         textMain.setCaretPosition(i);
-        if (row < y) {
-            for (int j = row; j < y; j++) {
-                textMain.append("\n");
-            }
-            textMain.setCaretPosition(textMain.getText().length());
-        }
     }
-    private int getPos() {
+    public int getLineNo() {
         int ret = 0;
         
         int pos = textMain.getCaretPosition();
@@ -175,21 +171,21 @@ public static ArrayList<String> urlRireki = new ArrayList<String>();
                 ret = ret + 1;
             }
         }
-        
+        //JOptionPane.showMessageDialog(this, "Now:" + ret + " Last:" + linkLanstLineNo);
         return ret;
     }
     private void upCar(int num) {
-        int y = getPos();
+        int y = getLineNo();
         y = y - num;
         if (y < 0) {
             y = 0;
         }
-        setPos(num);
+        setLineNo(num);
     }
     private void downCar(int num) {
-        int y = getPos();
+        int y = getLineNo();
         y = y + num;
-        setPos(y);
+        setLineNo(y);
     }
     private void migiDel() {
         int pos = textMain.getCaretPosition();
@@ -325,7 +321,7 @@ public static ArrayList<String> urlRireki = new ArrayList<String>();
                 if ((escMode.equals("CSI")) && (c == 'H')) {
                     //textMain.setRows(Pn);
                     //textMain.setColumns(Pn2);
-                    setPos(Pn2);
+                    setLineNo(Pn2);
                     int pos = textMain.getCaretPosition();
                     try {
                         textMain.setCaretPosition(pos + Pn);
@@ -686,7 +682,7 @@ public static ArrayList<String> urlRireki = new ArrayList<String>();
         //JavaSh.talk("ターミナルがフォーカスを得ました。");
     }//GEN-LAST:event_formWindowGainedFocus
 
-    private void talkKeyPressed(java.awt.event.KeyEvent evt) {
+    public void talkKeyPressed(java.awt.event.KeyEvent evt) {
         //押したキーを喋らせる
         int code = evt.getKeyCode();
         String hex = Integer.toHexString( code );
@@ -706,21 +702,6 @@ public static ArrayList<String> urlRireki = new ArrayList<String>();
             }
             if (code == evt.VK_DOWN) {
                 JavaSh.talkNoWait("した");
-                /*
-                if (textMain.getCaretPosition() < talkLatPos) {
-                    textMain.setCaretPosition(talkLatPos);
-                    //その行の行頭
-                    //HOMEキーをエミュレートしたい。
-                    Robot rb = null;
-                    try {
-                        rb = new Robot();
-                    } catch (AWTException ex) {
-                        Logger.getLogger(frmTerminal.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                    if (rb != null) {
-                        rb.keyPress(KeyEvent.VK_HOME);
-                    }
-                }*/
             }
             if (code == evt.VK_LEFT) {
                 JavaSh.talkNoWait("ひだり");
@@ -791,12 +772,18 @@ public static ArrayList<String> urlRireki = new ArrayList<String>();
         if (code == evt.VK_TAB) {
             JavaSh.talkNoWait("タブ");
         }
-        //F1-F10 セット
-        boolean bk = frmTerminal.yomiageWebMode;
-        yomiageWebMode = false;
-        String str = getLine();
-        yomiageWebMode = bk;
-        JavaSh.linkConv(str);
+        
+        //F1-F10 セット 但し、前の行を読み上げた直後は行わない。
+        if ((evt.VK_F1 <= code) && (code <= evt.VK_F10)) {
+            int nowL = getLineNo();
+            if ((linkLanstLineNo != nowL - 1) && (linkLanstLineNo != nowL)) {
+                boolean bk = frmTerminal.yomiageWebMode;
+                yomiageWebMode = false;
+                String str = getLine();
+                yomiageWebMode = bk;
+                JavaSh.linkConv(str, false);
+            }
+        }
         
         if (code == evt.VK_F1) {
             JavaSh.talkNoWait("エフ1");
@@ -885,6 +872,7 @@ public static ArrayList<String> urlRireki = new ArrayList<String>();
     private void textMainMyKeyEvent(java.awt.event.KeyEvent evt) {
 
         int keyCode = evt.getKeyCode();
+        System.err.println("textMainMyKeyEvent:" + keyCode);
         
         //チュートリアル専用メッセージ
         if (execTrd.tutorial) {
@@ -900,21 +888,13 @@ public static ArrayList<String> urlRireki = new ArrayList<String>();
                 String line = getLine();
                 System.out.println(line);
                 JavaSh.talkNoWait(line);
-
-            }
-        }
-        /*
-        //選択範囲あれば(矢印キーを押した時のみ)
-        if ((keyCode == evt.VK_LEFT) || (keyCode == evt.VK_RIGHT)) {
-            String sel = textMain.getSelectedText();
-            if (sel != null) {
-                if (!sel.equals("")) {
-                    JavaSh.talkNoWait(sel);
-                    //return;
+                //Web読み上げ中は、次の行にセット
+                if (yomiageWebMode) {
+                    //setLineNo(linkLanstLineNo + 1);
+                    setLineNo(getLineNo() + 1);
                 }
             }
         }
-        */
         //チュートリアルモード抜けるかチェック
         if (execTrd.tutorial) {
             if (keyCode == evt.VK_ENTER) {
@@ -925,33 +905,6 @@ public static ArrayList<String> urlRireki = new ArrayList<String>();
                     return;
                 }
             }
-        //} else {
-            /*
-            if (execTrd.running) {
-                //SSH向け入力処理
-                int cd = evt.getKeyCode();
-                char kc = evt.getKeyChar();
-                int setChar = 0;
-                if ((0x20 <= cd) || (cd != 0x7f)) {
-                    setChar = kc;
-                } else {
-                    setChar = cd;
-                }
-                //コントロールキーと同時押しの場合 キャラクターコードを調整
-                if (((evt.getModifiers() & KeyEvent.CTRL_MASK) != 0)) {
-                    setChar = (char)((int)setChar - 0x40);
-                }
-                //カーソルキーは定数をセット
-                if (cd == KeyEvent.VK_DOWN) {
-                    setChar = 0x1f;
-                }
-                
-                //SSH送信
-                InputTrd.setKey(setChar);
-                
-                evt.consume();  //キー入力をなかったことにする。
-                return;         //有無をいわさず抜ける
-            }*/
         }
         
         //チュートリアル中に、以降のコードを実行しないように。
@@ -984,7 +937,7 @@ public static ArrayList<String> urlRireki = new ArrayList<String>();
             if (cmdA[0].equals("edit")) {
                 //ファイル編集モード
                 mode = "edit";
-                JavaSh.talk("編集モードに移行します。保存はコントロールエス、中止はコントロールエックスです。");
+                JavaSh.talkNoWait("編集モードに移行します。保存はコントロールエス、中止はコントロールエックスです。");
                 String filename = "tmp.txt";
                 try {
                     filename = cmdA[1];
@@ -1002,13 +955,6 @@ public static ArrayList<String> urlRireki = new ArrayList<String>();
                 return;
             }
 
-            //System.out.println("Exec:" + cmd);
-            //ttyTrd = new JavaTerminal.ttyThread();
-            //InputTrd = new JavaTerminal.InputThread();
-            //ttyTrd.setCmd(cmd);
-            //ttyTrd.start();          //別スレッドで動作させる場合
-            //InputTrd.start();
-            //ErrorTrd.start();
             evt.consume();  //キー入力をなかったことにする
             
             //execTrd.setCmd(cmd);
@@ -1016,28 +962,45 @@ public static ArrayList<String> urlRireki = new ArrayList<String>();
             
             return;
         }
-        if (((evt.getModifiers() & KeyEvent.CTRL_MASK) != 0) && (evt.getKeyCode() == evt.VK_X)) {
-            if (!mode.equals("")) {
+        if (((evt.getModifiers() & InputEvent.CTRL_MASK) != 0) && (evt.getKeyCode() == evt.VK_X)) {
+            if (execTrd.running) {
                 textMain.setText(mode);
-                append("\n");
-                append("強制終了\n");
-                JavaSh.talk("強制終了");
-                mode = "";
-            }else if (execTrd.running) {
                 append("強制終了\n");
                 JavaSh.talk("強制終了");
                 mode = "";
                 execTrd.running = false;
                 execTrd.stop();     
+            } else {
+                textMain.setText(mode);
+                append("\n");
+                append("強制終了\n");
+                JavaSh.talk("強制終了");
+                mode = "";
             }
         }
-        if (((evt.getModifiers() & KeyEvent.CTRL_MASK) != 0) && (evt.getKeyCode() == evt.VK_S)) {
+        if (((evt.getModifiers() & InputEvent.CTRL_MASK) != 0) && (evt.getKeyCode() == evt.VK_S)) {
             if (mode.equals("edit")) {
                 writeFile();
                 append("編集を終了しました。\n");
                 JavaSh.talk("編集を終了しました。");
                 mode = "";
             }
+        }
+        if (((evt.getModifiers() & InputEvent.CTRL_MASK) != 0) && (evt.getKeyCode() == evt.VK_G)) {
+            cmdD.setText("");
+            JavaSh.talkNoWait("現在のカーソル位置は" + getLineNo() + "行目です。移動したい行番号を入力してエンターを押してください。");
+            cmdD.setVisible(true);
+            String str = cmdD.getText();
+            try {
+                int wk = Integer.parseInt(str);
+                setLineNo(wk);
+                JavaSh.talkNoWait(getLineNo() + "行目に移動しました。");
+            } catch (Exception e) {
+                JavaSh.talkNoWait("数値以外が入力されましたので何もしません。");
+            }
+        }
+        if (((evt.getModifiers() & InputEvent.CTRL_MASK) != 0) && (evt.getKeyCode() == evt.VK_R)) {
+            JavaSh.talkNoWait("現在のカーソル位置は" + getLineNo() + "行目です。");
         }
     }
     private void textMainKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textMainKeyPressed
@@ -1299,21 +1262,13 @@ public static ArrayList<String> urlRireki = new ArrayList<String>();
                 break;
             }
         }
-        //ファイル先頭で改行がいきなり来た場合
-        //ネット検索中は次の行へ移動
-        if (frmTerminal.yomiageWebMode) {
-            if ((sta <= 0) && (ed <= 0)) {
-                textMain.setSelectionStart(1);
-                textMain.setSelectionEnd(1);
-                return "";
-            }
-        }
         textMain.setSelectionStart(sta);
         textMain.setSelectionEnd(ed);
         String cmd = "";
         try {
             cmd = textMain.getSelectedText().trim();
-            //ネット検索中は次の行へ移動
+            //ネット検索中は次の行へ移動 
+            /*
             if (frmTerminal.yomiageWebMode) {
                 textMain.setSelectionStart(ed);
                 textMain.setSelectionEnd(ed);
@@ -1323,10 +1278,10 @@ public static ArrayList<String> urlRireki = new ArrayList<String>();
                 }catch (Exception e) {
                     //何もしない
                 }
-            } else {
+            } else { */
                 textMain.setSelectionStart(pos);
                 textMain.setSelectionEnd(pos);
-            }
+            //}
         }catch (Exception e) {
             //何もしない
         }

@@ -8,6 +8,8 @@ package javash;
 
 import java.net.*;
 import java.io.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.JTextArea;
 import javax.swing.JTextPane;
 import javax.swing.text.Element;
@@ -32,56 +34,6 @@ public class NetClass {
     }
     */
     
-  public void NetClass(String urls, JTextPane textP){
-      //ここは未使用です
-      frmTerminal.yomiageWebMode = true;
-    try{ //概ねの操作で例外処理が必要です。
-       //URLを作成する
-       URL url=new URL(urls);//URLを設定
-
-         // URL接続
-        HttpURLConnection connect = (HttpURLConnection)url.openConnection();//サイトに接続
-          connect.setRequestMethod("GET");//プロトコルの設定
-          InputStream in=connect.getInputStream();//ファイルを開く
-          
-          StringBuilder sb = new StringBuilder();
-          // ネットからデータの読み込み
-          String str;//ネットから読んだデータを保管する変数を宣言
-          str=readString(in);//1行読み取り
-          textP.setContentType( "text/html" );
-          textP.setEditable(false);
-          //HTMLDocument doc = (HTMLDocument)textP.getDocument();
-          HTMLEditorKit editorKit = (HTMLEditorKit)textP.getEditorKit();
-          
-          StyledDocument styleDoc = textP.getStyledDocument();
-          HTMLDocument doc = (HTMLDocument)styleDoc;
-          
-          
-          while (str!=null) {//読み取りが成功していれば
-              System.out.println(str);
-              try {
-                  Element last = doc.getParagraphElement(doc.getLength());
-                  doc.insertBeforeEnd(last, str);
-              } catch (Exception ex) {
-              }
-//                editorKit.insertHTML(doc, doc.getLength(), str, 0, 0, null);
-              str=readString(in);//次を読み込む
-          }
-          textP.setDocument(doc);
-          
-          System.err.println(textP.getDocument().getText(0, textP.getDocument().getLength()));
-          // URL切断
-          in.close();//InputStreamを閉じる
-          connect.disconnect();//サイトの接続を切断
-          
-          //textP.setText(sb.toString());
-          
-          
-    }catch(Exception e){
-      //例外処理が発生したら、表示する
-      System.out.println("Err ="+e);
-    }
-  }
   public void NetClass(String urls, JTextArea textP){
 
       //読み上げモード切り替え
@@ -106,7 +58,7 @@ public class NetClass {
         if (flg) {
             wk = urls;      //URLを設定
             url=new URL(wk);
-            frmTerminal.urlDir = url.toString();
+            frmTerminal.urlDir = url.getProtocol() + "://" + url.getHost() + url.getPath();
             frmTerminal.urlRoot = url.getProtocol() + "://" + url.getHost();
         } else {
             //１文字目が/の場合、ルートからの絶対パス
@@ -116,13 +68,9 @@ public class NetClass {
                 wk = frmTerminal.urlDir + "/" + urls;
             }
         }
-        //http 付加
-//        if (!wk.startsWith("http")) {
-//            wk = "http://"  + wk;
-//        }
-        //wk = ((wk.replaceAll("://", "___")).replaceAll("//", "/")).replaceAll("___", "://");
         url=new URL(wk);
-        frmTerminal.urlDir = wk.replaceFirst("/[a-zA-Z0-9_\\-]+?\\.html*", "");
+        frmTerminal.urlDir = wk.replaceFirst("/[a-zA-Z0-9_\\-]+?\\.html*#*.*$", "");
+        //frmTerminal.urlDir = 
         frmTerminal.urlRireki.add(wk.toString());
         
         System.err.println("RirekiAdd:" + url.toString());
@@ -137,7 +85,7 @@ public class NetClass {
           str=readString(in);//1行読み取り
           flg = false;
           while (str!=null) {//読み取りが成功していれば
-              System.out.println(str);
+              //System.out.println(str);
               
               if (!str.trim().equals("")) {
                   sb.append(str);
@@ -196,7 +144,7 @@ public class NetClass {
         str = str.replaceAll("\r", "");
         str = str.replaceAll("\n\n*", "\n");
         
-        
+        java.awt.Toolkit.getDefaultToolkit().beep();
         textP.setText("\n" + str + "\n以上です。\n");
         textP.setCaretPosition(0);
         
@@ -291,7 +239,7 @@ public class NetClass {
                     mode = "br";
                 }
                 if (arr[0].toLowerCase().equals("span")) {
-                    mode = "br";
+                    mode = "out";
                 }
                 if (arr[0].toLowerCase().equals("style")) {
                     rangemode = "del";
@@ -357,7 +305,7 @@ public class NetClass {
             ret.append(c);
             mode = "out";
           }
-          if ((rangemode.equals("out")) && (mode.equals("out"))) {
+          if (!c.equals("<") && ((rangemode.equals("out")) && (mode.equals("out")))) {
             ret.append(c);
           }
           
@@ -393,6 +341,8 @@ public class NetClass {
   
   //InputStreamより１行だけ読む（読めなければnullを返す）
   static String readString(InputStream in){
+    String charset = "JISAutoDetect";     //初期値
+    Pattern pattern3 = Pattern.compile("content=[\"\'][.*]charset=[.+?][\"\']>");
     try{
       int l;//呼んだ長さを記録
       int a;//読んだ一文字の記録に使う
@@ -408,12 +358,22 @@ public class NetClass {
         a=in.read();//次を読む
       }
       String utf8 = new String(b,0,l);//文字列に変換
-      String sjis = new String(b,0,l, "Windows-31J");//文字列に変換
-      if (utf8.length() <= sjis.length()) {
-          return utf8;
-      } else {
-          return sjis;
+      String sjis = new String(b,0,l, charset);//文字列に変換 JISAutoDetect
+      //System.err.println("utf8:" + utf8 + "  jis:" + sjis);
+      Matcher matcherL = pattern3.matcher(utf8);
+      if (matcherL.find()) {
+          charset = matcherL.group(2);
       }
+      int u = utf8.length();
+      //int e = eucjp.length();
+      int s = sjis.length();
+      //System.err.println("utf8:" + utf8 + "  euc:" + eucjp + "  sjis:" + sjis);
+      //System.err.println("utf8:" + u + "  euc:" + e + "  sjis:" + s);
+        if (u <= s) {
+            return utf8;
+        } else {
+            return sjis;
+        }
     }catch(IOException e){
       //Errが出たら、表示してnull値を返す
       System.out.println("Err="+e);

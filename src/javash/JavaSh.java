@@ -138,7 +138,8 @@ public static String[] url = new String[10];
             e.printStackTrace();
         }
     }
-    public static String linkConv(String str) {
+    public static String linkConv(String str, boolean lineControl) {
+        System.err.println("linkConv:" + frmTerminal.linkLanstLineNo);
         if (frmTerminal.yomiageWebMode) {
             //URL省略
             Pattern pattern3 = Pattern.compile("\\[\\[\\[.+?\\]\\]\\]");
@@ -154,7 +155,11 @@ public static String[] url = new String[10];
                     //url[j] = "";
                 }
             }
-            System.out.println(str);
+            //最後に取得した行番号を取得
+            if (lineControl) {
+                frmTerminal.linkLanstLineNo = frmT.getLineNo();
+            }
+            //System.out.println(str);
         }
         return str;
     }
@@ -173,7 +178,7 @@ public static String[] url = new String[10];
         if (str.trim().equals("")) {
             return;
         }
-        str = linkConv(str);
+        str = linkConv(str, true);
         //言語判定
         String sh = talkSh;
         frmT.englishFlg = false;
