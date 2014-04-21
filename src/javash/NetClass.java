@@ -19,7 +19,9 @@ import javax.swing.JTextArea;
 public class NetClass {
     String mode = "out";
     String rangemode = "out";
-
+    String tagname = "";
+    String title = "";
+    
     public NetClass() {
     }
     /*
@@ -33,6 +35,8 @@ public class NetClass {
 
       //読み上げモード切り替え
       frmTerminal.yomiageWebMode = true;
+      //行番号クリア
+      frmTerminal.linkLanstLineNo = -100;
       
     try{ //概ねの操作で例外処理が必要です。
        //URLを作成する
@@ -124,11 +128,11 @@ public class NetClass {
         str = sb.toString();
         str = replaceTag(str);
         
-        //全行トリム
+        //全行トリム(全角スペースも)
         sb = new StringBuilder();
         String[] strs = str.split("\n");
         for (int i = 0; i < strs.length; i++) {
-            sb.append(strs[i].replaceAll(" +$",""));
+            sb.append(strs[i].replaceAll("[ 　]+$",""));
             sb.append("\n");
         }
         str = sb.toString();
@@ -151,6 +155,7 @@ public class NetClass {
   
   private String replaceTag(String str) {
       StringBuilder ret = new StringBuilder();
+      StringBuilder sbwk = new StringBuilder();
       
       if (rangemode.equals("")) {
         rangemode = "out";
@@ -158,9 +163,10 @@ public class NetClass {
       if (mode.equals("")) {
         mode = "out;";
       }
-      
+      //    
       str = str.replaceAll("&nbsp;", " ");
       str = str.replaceAll("&quot;", "'");
+      str = str.replaceAll("&amp;", "&");
       
       String url = "";
       
@@ -183,13 +189,14 @@ public class NetClass {
                 wk = wk.replaceFirst("<", "");
                 //System.out.println(wk);
                 String[] arr = wk.split("[\\s\\=]+");
+                tagname = arr[0].toLowerCase();
                 
                 if (arr[0].toLowerCase().equals("a")) {
                     mode = "a";
                 }
-                if (arr[0].toLowerCase().equals("/a")) {
-                    mode = "br";
-                }
+//                if (arr[0].toLowerCase().equals("/a")) {
+//                    mode = "br";
+//                }
                 if (arr[0].toLowerCase().equals("br")) {
                     mode = "br";
                 }
@@ -252,7 +259,7 @@ public class NetClass {
                     rangemode = "get";
                 }
                 if (arr[0].toLowerCase().equals("/title")) {
-                    rangemode = "out";
+                    rangemode = "getend";
                 }
                 for (int j = 0; j < arr.length; j++) {
                   if ((mode.equals("href"))) {
@@ -286,9 +293,6 @@ public class NetClass {
               }
 
           }
-          if (c.equals("。")) {
-              mode = "maru";
-          }
           if (c.equals("\n")) {
               mode = "";
           }
@@ -298,6 +302,7 @@ public class NetClass {
           //出力処理
           if (!c.equals("<") && (rangemode.equals("get"))) {
             ret.append(c);
+            sbwk.append(c);
             mode = "out";
           }
           if (!c.equals("<") && ((rangemode.equals("out")) && (mode.equals("out")))) {
@@ -309,6 +314,13 @@ public class NetClass {
             mode = "out";
           }
           if (rangemode.equals("getend")) {
+            //値を取得
+              System.err.println("get:" + tagname + ":" + sbwk.toString());
+              if (tagname.equals("/title")) {
+                  title = sbwk.toString();
+                  JavaSh.talkNoWait(title);
+              }
+              sbwk = new StringBuilder();
             //モードを戻さないといけない
             rangemode = "out";
             mode = "out";
@@ -317,12 +329,8 @@ public class NetClass {
             ret.append('\n');
             mode = "out";
           }
-          if (mode.equals("maru")) {
-            ret.append("。");       //丸で改行するか悩む
-            mode = "out";
-          }
           if (!url.equals("")) {
-            ret.append("[[[" + url.replaceAll("[\"\']", "") + "]]]");
+            ret.append("\n[[[" + url.replaceAll("[\"\']", "") + "]]]");
           }
           if (rangemode.equals("out")) {
               //範囲指定の条件が無ければ出力モードに

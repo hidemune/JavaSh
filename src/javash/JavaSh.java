@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Properties;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -141,6 +140,7 @@ public static String[] url = new String[10];
     }
     public static String linkConv(String str, boolean lineControl) {
         System.err.println("linkConv:" + frmTerminal.linkLanstLineNo);
+        System.out.println(str);
         if (frmTerminal.yomiageWebMode) {
             //URL省略
             Pattern pattern3 = Pattern.compile("\\[\\[\\[.+?\\]\\]\\]");
@@ -149,16 +149,18 @@ public static String[] url = new String[10];
                 Matcher matcherL = pattern3.matcher(str);
                 if (matcherL.find()) {
                     String link = matcherL.group(0);
-                    url[j] = link.replaceAll("\\[\\[\\[", "").replaceAll("\\]\\]\\]", "");
-                    System.err.println(url[j]);
+                    String wk = link.replaceAll("\\[\\[\\[", "").replaceAll("\\]\\]\\]", "");
+                    System.err.println(wk);
                     str = matcherL.replaceFirst(" F" + (j+1) + "Link ");
+                    System.out.println(str + wk);
+                    //最後に取得した行番号を取得
+                    if (lineControl) {
+                        url[j] = wk;
+                        frmTerminal.linkLanstLineNo = frmT.getLineNo();
+                    }
                 } else {
                     //url[j] = "";
                 }
-            }
-            //最後に取得した行番号を取得
-            if (lineControl) {
-                frmTerminal.linkLanstLineNo = frmT.getLineNo();
             }
             //System.out.println(str);
         }
@@ -179,6 +181,7 @@ public static String[] url = new String[10];
         if (str.trim().equals("")) {
             return;
         }
+        //行の読み上げとは限らない
         str = linkConv(str, true);
         //言語判定
         String sh = talkSh;

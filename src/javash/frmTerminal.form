@@ -98,7 +98,7 @@
           <SubComponents>
             <MenuItem class="javax.swing.JMenuItem" name="Web">
               <Properties>
-                <Property name="text" type="java.lang.String" value="&#x9752;&#x7a7a;&#x6587;&#x5eab;"/>
+                <Property name="text" type="java.lang.String" value="Yahoo&#x691c;&#x7d22;"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="WebActionPerformed"/>

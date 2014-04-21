@@ -17,6 +17,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import static javash.JavaSh.linkConv;
 import javax.swing.InputMap;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
@@ -45,7 +46,7 @@ int talkLatPos = 0;
 public static String urlDir = "";
 public static String urlRoot = "";
 public static ArrayList<String> urlRireki = new ArrayList<String>();
-public static int linkLanstLineNo = 0;
+public static int linkLanstLineNo = -100;
 commandDialog cmdD = new commandDialog(this, true);
 
     /**
@@ -628,7 +629,7 @@ commandDialog cmdD = new commandDialog(this, true);
             }
         });
 
-        Web.setText("青空文庫");
+        Web.setText("Yahoo検索");
         Web.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 WebActionPerformed(evt);
@@ -798,11 +799,9 @@ commandDialog cmdD = new commandDialog(this, true);
         if ((evt.VK_F1 <= code) && (code <= evt.VK_F10)) {
             int nowL = getLineNo();
             if ((linkLanstLineNo != nowL - 1) && (linkLanstLineNo != nowL)) {
-                boolean bk = frmTerminal.yomiageWebMode;
-                yomiageWebMode = false;
+                System.out.println("リンクを退避：" + nowL);
                 String str = getLine();
-                yomiageWebMode = bk;
-                JavaSh.linkConv(str, false);
+                JavaSh.linkConv(str, true);
             }
         }
         
@@ -1166,9 +1165,10 @@ commandDialog cmdD = new commandDialog(this, true);
 
     private void WebActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_WebActionPerformed
         // Web取得
-        NetClass net = new NetClass();
-        net.NetClass("http://www.aozora.gr.jp/", textMain);
-        
+        //NetClass net = new NetClass();
+        //net.NetClass("http://www.yahoo.co.jp/", textMain);
+        textMain.setText("yahoo ");
+        JavaSh.talkNoWait("検索したい単語を入力してエンターを押して下さい。");
     }//GEN-LAST:event_WebActionPerformed
 
     private void jMenu1FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jMenu1FocusGained
@@ -1280,27 +1280,13 @@ commandDialog cmdD = new commandDialog(this, true);
         String cmd = "";
         try {
             cmd = textMain.getSelectedText().trim();
-            //ネット検索中は次の行へ移動 
-            /*
-            if (frmTerminal.yomiageWebMode) {
-                textMain.setSelectionStart(ed);
-                textMain.setSelectionEnd(ed);
-                try {
-                    textMain.setSelectionStart(ed+1);
-                    textMain.setSelectionEnd(ed+1);
-                }catch (Exception e) {
-                    //何もしない
-                }
-            } else { */
-                textMain.setSelectionStart(sta);
-                textMain.setSelectionEnd(sta);
-                textMain.setSelectionStart(sta + 1);
-                textMain.setSelectionEnd(sta + 1);
-            //}
+            textMain.setSelectionStart(sta);
+            textMain.setSelectionEnd(sta);
+            textMain.setSelectionStart(sta + 1);
+            textMain.setSelectionEnd(sta + 1);
         }catch (Exception e) {
             //何もしない
         }
-        //System.out.println(cmd);
         return cmd;
     }
     /**
