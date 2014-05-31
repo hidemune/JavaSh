@@ -153,6 +153,129 @@ public class NetClass {
     }
   }
   
+  public void LocalClass(String urls, JTextArea textP){
+
+      //読み上げモード切り替え
+      frmTerminal.yomiageWebMode = true;
+      //行番号クリア
+      frmTerminal.linkLanstLineNo = -100;
+      
+    try{ //概ねの操作で例外処理が必要です。
+       //URLを作成する
+       URL url = null;
+       String wk = "";
+       
+        System.err.println("urlDir:" + frmTerminal.urlDir);
+        System.err.println("urlpath:" + urls);
+        //ドメイン情報が含まれていたら保存
+        String[] dom = {"file:"};
+        boolean flg = false;
+        for (int i = 0; i < dom.length; i++) {
+            if (urls.contains(dom[i])) {
+                flg = true;
+                break;
+            }
+        }
+        if (flg) {
+            wk = urls;      //URLを設定
+            url=new URL(wk);
+            frmTerminal.urlDir = url.getProtocol() + "://" + url.getHost() + url.getPath();
+            frmTerminal.urlRoot = url.getProtocol() + "://" + url.getHost();
+        } else {
+            //１文字目が/の場合、ルートからの絶対パス
+            if (urls.startsWith("/")) {
+                wk = frmTerminal.urlRoot + urls;
+            } else {
+                wk = frmTerminal.urlDir + "/" + urls;
+            }
+        }
+        url=new URL(wk);
+        frmTerminal.urlDir = wk.replaceFirst("/[a-zA-Z0-9_\\-]+?\\.html*#*.*$", "");
+        //frmTerminal.urlDir = 
+        frmTerminal.urlRireki.add(wk.toString());
+        
+        System.err.println("RirekiAdd:" + url.toString());
+        // URL接続
+        //HttpURLConnection connect = (HttpURLConnection)url.openConnection();//サイトに接続
+        //  connect.setRequestMethod("GET");//プロトコルの設定
+          InputStreamReader in = new InputStreamReader(url.openStream());//ファイルを開く
+          BufferedReader br = new BufferedReader(in);
+          
+          StringBuilder sb = new StringBuilder("\n");
+          // ネットからデータの読み込み
+          String str;//ネットから読んだデータを保管する変数を宣言
+          str=br.readLine();//1行読み取り
+          flg = false;
+          while (str!=null) {//読み取りが成功していれば
+              //System.out.println(str);
+              
+              if (!str.trim().equals("")) {
+                  sb.append(str);
+                  //sb.append("\n");
+              }
+              
+              str=br.readLine();//次を読み込む
+          }
+          
+          // URL切断
+          in.close();//InputStreamを閉じる
+          //connect.disconnect();//サイトの接続を切断
+          
+        /* タグの削除
+         * 1行中の、　<　から　> までを削除
+         * 但し、Aタグだけはhref文字列を取得
+         */
+        /* タグの削除
+         * <!--　から　--> までの、全ての行を削除
+         */
+
+        str = null;
+        while (true) {
+            int sta = sb.toString().indexOf("<!--");
+            int ed = sb.toString().indexOf("-->", sta);
+            if ((0 <= sta) && (sta < ed)) {
+                sb.delete(sta, ed + 3);
+            } else {
+                break;
+            }
+        }
+        while (true) {
+            int sta = sb.toString().indexOf("<!");
+            int ed = sb.toString().indexOf(">", sta);
+            if ((0 <= sta) && (sta < ed)) {
+                sb.delete(sta, ed + 1);
+            } else {
+                break;
+            }
+        }
+        str = sb.toString();
+        str = replaceTag(str);
+        
+        //全行トリム(全角スペースも)
+        sb = new StringBuilder();
+        String[] strs = str.split("\n");
+        for (int i = 0; i < strs.length; i++) {
+            sb.append(strs[i].replaceAll("[ 　]+$",""));
+            sb.append("\n");
+        }
+        str = sb.toString();
+        
+        //丸で改行
+        str = str.replaceAll("。", "。\n");
+        //2つ以上の連続した改行は1つに設定
+        str = str.replaceAll("\r", "");
+        str = str.replaceAll("\n\n*", "\n");
+        
+        java.awt.Toolkit.getDefaultToolkit().beep();
+        textP.setText("\n" + str + "\n以上です。\n");
+        textP.setCaretPosition(0);
+        
+    }catch(Exception e){
+      //例外処理が発生したら、表示する
+      e.printStackTrace();
+    }
+  }
+
   private String replaceTag(String str) {
       StringBuilder ret = new StringBuilder();
       StringBuilder sbwk = new StringBuilder();
@@ -199,6 +322,7 @@ public class NetClass {
 //                }
                 if (arr[0].toLowerCase().equals("br")) {
                     mode = "br";
+                    //mode = "";  これはさすがに無理がある（。以外で改行しないという処理）
                 }
                 if (arr[0].toLowerCase().equals("p")) {
                     mode = "br";

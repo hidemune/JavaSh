@@ -364,6 +364,12 @@ public static String[] url = new String[10];
                     net.NetClass(cmdarg[0], frmT.getTextArea());
                     return;
                 }
+                if (cmdarg[0].startsWith("file")) {
+                    // Web取得
+                    NetClass net = new NetClass();
+                    net.LocalClass(cmdarg[0], frmT.getTextArea());
+                    return;
+                }
                 
                 if (cmdarg[0].equals("yahoo")) {
                     // Web取得
