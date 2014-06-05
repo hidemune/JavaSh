@@ -44,6 +44,7 @@ public static ArrayList<String[]> Dict = new ArrayList<String[]>();
 //public static Process backTalkP;
 public static String pwd = "/home";
 public static String[] url = new String[10];
+public static String mainPage = "";
 
     /**
      * @param args the command line arguments
@@ -56,6 +57,10 @@ public static String[] url = new String[10];
             config.load(new InputStreamReader(new FileInputStream("JavaSh.properties"), "UTF-8"));
         }catch (Exception e){
             e.printStackTrace();
+        }
+        
+        if (args.length >= 1) {
+            mainPage = args[0];
         }
         
         talkExecIn = config.getProperty("talkExec", "/usr/local/bin/open_jtalk");

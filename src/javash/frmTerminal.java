@@ -16,7 +16,11 @@ import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import static javash.JavaSh.Dict;
 import static javash.JavaSh.linkConv;
 import javax.swing.InputMap;
 import javax.swing.JTextArea;
@@ -473,6 +477,7 @@ commandDialog cmdD = new commandDialog(this, true);
         jMenu3 = new javax.swing.JMenu();
         jMenuItem6 = new javax.swing.JMenuItem();
         jMenu4 = new javax.swing.JMenu();
+        jMenuItemMokuji = new javax.swing.JMenuItem();
         Web = new javax.swing.JMenuItem();
         WebAbout = new javax.swing.JMenuItem();
         WebJAbout = new javax.swing.JMenuItem();
@@ -487,6 +492,9 @@ commandDialog cmdD = new commandDialog(this, true);
             }
         });
         addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowActivated(java.awt.event.WindowEvent evt) {
+                formWindowActivated(evt);
+            }
             public void windowClosing(java.awt.event.WindowEvent evt) {
                 formWindowClosing(evt);
             }
@@ -628,6 +636,14 @@ commandDialog cmdD = new commandDialog(this, true);
                 jMenu4FocusGained(evt);
             }
         });
+
+        jMenuItemMokuji.setText("目次");
+        jMenuItemMokuji.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemMokujiActionPerformed(evt);
+            }
+        });
+        jMenu4.add(jMenuItemMokuji);
 
         Web.setText("Yahoo検索");
         Web.addActionListener(new java.awt.event.ActionListener() {
@@ -1248,6 +1264,40 @@ commandDialog cmdD = new commandDialog(this, true);
         net.NetClass("http://tanaka-cs.co.jp/aisatu.html", textMain);
         //frmHtml.setVisible(true);
     }//GEN-LAST:event_WebJAboutActionPerformed
+
+    private void jMenuItemMokujiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemMokujiActionPerformed
+        textMain.setText("");
+        if (JavaSh.mainPage.equals("")) {
+            return;
+        }
+        //目次テキストの読み込み
+        StringBuilder sb = new StringBuilder();
+        try {
+            BufferedReader br;
+            br = new BufferedReader(new InputStreamReader(new FileInputStream(JavaSh.mainPage), "UTF-8"));
+            // 最終行まで読み込む
+            String line = "";
+            while ((line = br.readLine()) != null) {
+                    sb.append(line);
+                    sb.append("\n");
+                }
+            br.close();
+        } catch (Exception e) {
+            // BufferedReaderオブジェクトのクローズ時の例外捕捉
+            e.printStackTrace();
+        }
+        textMain.setText(sb.toString());
+        //1行目を読み上げ
+        //textMain.setSelectionStart(0);
+        //textMain.setSelectionEnd(0);
+        setLineNo(0);
+        JavaSh.talk(getLine(), false);
+    }//GEN-LAST:event_jMenuItemMokujiActionPerformed
+
+    private void formWindowActivated(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowActivated
+        //目次を表示
+        jMenuItemMokujiActionPerformed(null);
+    }//GEN-LAST:event_formWindowActivated
     private String getLine() {
         int pos = textMain.getCaretPosition();
         String text = textMain.getText();
@@ -1339,6 +1389,7 @@ commandDialog cmdD = new commandDialog(this, true);
     private javax.swing.JMenuItem jMenuItem4;
     private javax.swing.JMenuItem jMenuItem5;
     private javax.swing.JMenuItem jMenuItem6;
+    private javax.swing.JMenuItem jMenuItemMokuji;
     private javax.swing.JScrollPane scroll;
     private javax.swing.JTextArea textMain;
     // End of variables declaration//GEN-END:variables

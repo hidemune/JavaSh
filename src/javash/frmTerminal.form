@@ -96,6 +96,14 @@
             <EventHandler event="focusGained" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="jMenu4FocusGained"/>
           </Events>
           <SubComponents>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItemMokuji">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="&#x76ee;&#x6b21;"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemMokujiActionPerformed"/>
+              </Events>
+            </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="Web">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Yahoo&#x691c;&#x7d22;"/>
@@ -137,6 +145,7 @@
   </SyntheticProperties>
   <Events>
     <EventHandler event="windowGainedFocus" listener="java.awt.event.WindowFocusListener" parameters="java.awt.event.WindowEvent" handler="formWindowGainedFocus"/>
+    <EventHandler event="windowActivated" listener="java.awt.event.WindowListener" parameters="java.awt.event.WindowEvent" handler="formWindowActivated"/>
     <EventHandler event="windowClosing" listener="java.awt.event.WindowListener" parameters="java.awt.event.WindowEvent" handler="formWindowClosing"/>
   </Events>
   <AuxValues>

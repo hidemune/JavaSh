@@ -2,7 +2,7 @@
 #引数を喋らせます。
 
 #Open JTalk
-infile="$1".txt
+infile=/tmp/"$1".txt
 outfile=${infile}.wav
 
 echo ${infile}
