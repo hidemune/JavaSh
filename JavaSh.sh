@@ -4,4 +4,4 @@ CURDIR=`dirname $0`
 echo $CURDIR
 cd $CURDIR
 
-java -jar $CURDIR/dist/JavaSh.jar
+java -jar $CURDIR/dist/JavaSh.jar $1

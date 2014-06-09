@@ -498,6 +498,9 @@ commandDialog cmdD = new commandDialog(this, true);
             public void windowClosing(java.awt.event.WindowEvent evt) {
                 formWindowClosing(evt);
             }
+            public void windowOpened(java.awt.event.WindowEvent evt) {
+                formWindowOpened(evt);
+            }
         });
 
         textMain.setColumns(20);
@@ -1295,9 +1298,13 @@ commandDialog cmdD = new commandDialog(this, true);
     }//GEN-LAST:event_jMenuItemMokujiActionPerformed
 
     private void formWindowActivated(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowActivated
+
+    }//GEN-LAST:event_formWindowActivated
+
+    private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
         //目次を表示
         jMenuItemMokujiActionPerformed(null);
-    }//GEN-LAST:event_formWindowActivated
+    }//GEN-LAST:event_formWindowOpened
     private String getLine() {
         int pos = textMain.getCaretPosition();
         String text = textMain.getText();
