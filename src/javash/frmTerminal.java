@@ -815,7 +815,8 @@ commandDialog cmdD = new commandDialog(this, true);
         }
         
         //F1-F10 セット 但し、前の行を読み上げた直後は行わない。
-        if ((evt.VK_F1 <= code) && (code <= evt.VK_F10)) {
+//        if ((evt.VK_F1 <= code) && (code <= evt.VK_F10)) {
+        if ((evt.VK_F2 == code)) {
             int nowL = getLineNo();
             if ((linkLanstLineNo != nowL - 1) && (linkLanstLineNo != nowL)) {
                 System.out.println("リンクを退避：" + nowL);
@@ -826,74 +827,77 @@ commandDialog cmdD = new commandDialog(this, true);
         
         if (code == evt.VK_F1) {
             JavaSh.talkNoWait("エフ1");
-            String url = JavaSh.url[0];
-            System.err.println(url);
-            if (!url.equals("")) {
-                webAccess(url);
-            }
+//            String url = JavaSh.url[0];
+            //String url = JavaSh.mainPage;
+            //System.err.println(url);
+            //if (!url.equals("")) {
+            //    webAccess(url);
+            //}
+            jMenuItemMokujiActionPerformed(null);
         }
         if (code == evt.VK_F2) {
             JavaSh.talkNoWait("エフ2");
-            String url = JavaSh.url[1];
+            String url = JavaSh.url[0];
             if (!url.equals("")) {
                 webAccess(url);
             }
         }
         if (code == evt.VK_F3) {
             JavaSh.talkNoWait("エフ3");
-            String url = JavaSh.url[2];
-            if (!url.equals("")) {
-                webAccess(url);
-            }
+            //String url = JavaSh.url[2];
+            //if (!url.equals("")) {
+            //    webAccess(url);
+            //}
+            WebActionPerformed(null);
         }
         if (code == evt.VK_F4) {
             JavaSh.talkNoWait("エフ4");
-            String url = JavaSh.url[3];
-            if (!url.equals("")) {
-                webAccess(url);
-            }
+            //String url = JavaSh.url[3];
+            //if (!url.equals("")) {
+            //    webAccess(url);
+            //}
         }
         if (code == evt.VK_F5) {
             JavaSh.talkNoWait("エフ5");
-            String url = JavaSh.url[4];
-            if (!url.equals("")) {
-                webAccess(url);
-            }
+            //String url = JavaSh.url[4];
+            //if (!url.equals("")) {
+            //    webAccess(url);
+            //}
         }
         if (code == evt.VK_F6) {
             JavaSh.talkNoWait("エフ6");
-            String url = JavaSh.url[5];
-            if (!url.equals("")) {
-                webAccess(url);
-            }
+            //String url = JavaSh.url[5];
+            //if (!url.equals("")) {
+            //    webAccess(url);
+            //}
         }
         if (code == evt.VK_F7) {
             JavaSh.talkNoWait("エフ7");
-            String url = JavaSh.url[6];
-            if (!url.equals("")) {
-                webAccess(url);
-            }
+            //String url = JavaSh.url[6];
+            //if (!url.equals("")) {
+            //    webAccess(url);
+            //}
         }
         if (code == evt.VK_F8) {
             JavaSh.talkNoWait("エフ8");
-            String url = JavaSh.url[7];
-            if (!url.equals("")) {
-                webAccess(url);
-            }
+            //String url = JavaSh.url[7];
+            //if (!url.equals("")) {
+            //    webAccess(url);
+            //}
         }
         if (code == evt.VK_F9) {
             JavaSh.talkNoWait("エフ9");
-            String url = JavaSh.url[8];
-            if (!url.equals("")) {
-                webAccess(url);
-            }
+            //String url = JavaSh.url[8];
+            //if (!url.equals("")) {
+            //    webAccess(url);
+            //}
         }
         if (code == evt.VK_F10) {
             JavaSh.talkNoWait("エフ10");
-            String url = JavaSh.url[9];
-            if (!url.equals("")) {
-                webAccess(url);
-            }
+            //String url = JavaSh.url[9];
+            //if (!url.equals("")) {
+            //    webAccess(url);
+            //}
         }
         if (code == evt.VK_F11) {
             JavaSh.talkNoWait("エフ11");
@@ -969,7 +973,7 @@ commandDialog cmdD = new commandDialog(this, true);
                 editFile(filename);
                 return;
             }
-
+            
             if (cmdA[0].equals("clear")) {
                 //画面クリア
                 textMain.setText("");
@@ -982,6 +986,7 @@ commandDialog cmdD = new commandDialog(this, true);
                 JavaSh.ExecThread execTrd = new JavaSh.ExecThread();
                 execTrd.setCmd(cmd);
                 execTrd.start();
+                evt.consume();  //キー入力をなかったことにする
             }
             return;
         }

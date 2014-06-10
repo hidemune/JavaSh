@@ -156,7 +156,8 @@ public static String mainPage = "";
                     String link = matcherL.group(0);
                     String wk = link.replaceAll("\\[\\[\\[", "").replaceAll("\\]\\]\\]", "");
                     System.err.println(wk);
-                    str = matcherL.replaceFirst(" F" + (j+1) + "Link ");
+//                    str = matcherL.replaceFirst(" F" + (j+1) + "Link ");
+                    str = matcherL.replaceFirst(" F2Link ");
                     System.out.println(str + wk);
                     //最後に取得した行番号を取得
                     if (lineControl) {
@@ -437,11 +438,12 @@ public static String mainPage = "";
             } catch (Exception ex) {
                 ex.printStackTrace();
                 talk("エラーです。");
-                frmT.append(ex.toString());
-                frmT.append("\n");
-                frmT.repaintReq();
-                talk(ex.toString());
+                //frmT.append(ex.toString());
+                //frmT.append("\n");
+                //frmT.repaintReq();
+                //talk(ex.toString());
                 running = false;
+                return;
             }
             frmT.setCaretPos(0);
         }
