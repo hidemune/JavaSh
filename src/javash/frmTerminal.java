@@ -6,6 +6,8 @@
 
 package javash;
 
+import java.awt.GraphicsEnvironment;
+import java.awt.Rectangle;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
@@ -59,6 +61,10 @@ commandDialog cmdD = new commandDialog(this, true);
     public frmTerminal() {
         initComponents();
         cmdD.setMainFrm(this);
+        
+        GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        Rectangle rect = env.getMaximumWindowBounds();
+        setBounds(rect);
         
         //chkMenuEnglish.setSelected(englishFlg);
         
@@ -826,7 +832,7 @@ commandDialog cmdD = new commandDialog(this, true);
         }
         
         if (code == evt.VK_F1) {
-            JavaSh.talkNoWait("エフ1");
+            JavaSh.talkNoWait("目次");
 //            String url = JavaSh.url[0];
             //String url = JavaSh.mainPage;
             //System.err.println(url);
@@ -836,14 +842,14 @@ commandDialog cmdD = new commandDialog(this, true);
             jMenuItemMokujiActionPerformed(null);
         }
         if (code == evt.VK_F2) {
-            JavaSh.talkNoWait("エフ2");
+            JavaSh.talkNoWait("リンク");
             String url = JavaSh.url[0];
             if (!url.equals("")) {
                 webAccess(url);
             }
         }
         if (code == evt.VK_F3) {
-            JavaSh.talkNoWait("エフ3");
+            //JavaSh.talkNoWait("検索");
             //String url = JavaSh.url[2];
             //if (!url.equals("")) {
             //    webAccess(url);
@@ -851,18 +857,20 @@ commandDialog cmdD = new commandDialog(this, true);
             WebActionPerformed(null);
         }
         if (code == evt.VK_F4) {
-            JavaSh.talkNoWait("エフ4");
-            //String url = JavaSh.url[3];
-            //if (!url.equals("")) {
-            //    webAccess(url);
-            //}
+            JavaSh.talkNoWait("現在のカーソル位置は" + getLineNo() + "行目です。");
         }
         if (code == evt.VK_F5) {
-            JavaSh.talkNoWait("エフ5");
-            //String url = JavaSh.url[4];
-            //if (!url.equals("")) {
-            //    webAccess(url);
-            //}
+            cmdD.setText("");
+            JavaSh.talkNoWait("現在のカーソル位置は" + getLineNo() + "行目です。移動したい行番号を入力してエンターを押してください。");
+            cmdD.setVisible(true);
+            String str = cmdD.getText();
+            try {
+                int wk = Integer.parseInt(str);
+                setLineNo(wk);
+                JavaSh.talkNoWait(getLineNo() + "行目に移動しました。");
+            } catch (Exception e) {
+                JavaSh.talkNoWait("数値以外が入力されましたので何もしません。");
+            }
         }
         if (code == evt.VK_F6) {
             JavaSh.talkNoWait("エフ6");
@@ -1022,22 +1030,7 @@ commandDialog cmdD = new commandDialog(this, true);
                 mode = "";
             }
         }
-        if (((evt.getModifiers() & InputEvent.CTRL_MASK) != 0) && (evt.getKeyCode() == evt.VK_G)) {
-            cmdD.setText("");
-            JavaSh.talkNoWait("現在のカーソル位置は" + getLineNo() + "行目です。移動したい行番号を入力してエンターを押してください。");
-            cmdD.setVisible(true);
-            String str = cmdD.getText();
-            try {
-                int wk = Integer.parseInt(str);
-                setLineNo(wk);
-                JavaSh.talkNoWait(getLineNo() + "行目に移動しました。");
-            } catch (Exception e) {
-                JavaSh.talkNoWait("数値以外が入力されましたので何もしません。");
-            }
-        }
-        if (((evt.getModifiers() & InputEvent.CTRL_MASK) != 0) && (evt.getKeyCode() == evt.VK_R)) {
-            JavaSh.talkNoWait("現在のカーソル位置は" + getLineNo() + "行目です。");
-        }
+
     }
     private void textMainKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textMainKeyPressed
         textMainMyKeyEvent(evt);

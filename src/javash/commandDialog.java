@@ -25,6 +25,7 @@ frmTerminal frmT;
     }
     public void setText(String str) {
         textCommand.setText(str);
+        
     }
     public String getText() {
         return textCommand.getText();
