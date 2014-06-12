@@ -54,6 +54,7 @@ public static String urlRoot = "";
 public static ArrayList<String> urlRireki = new ArrayList<String>();
 public static int linkLanstLineNo = -100;
 commandDialog cmdD = new commandDialog(this, true);
+int mokujiPos = 0;
 
     /**
      * Creates new form frmTerminal
@@ -832,6 +833,7 @@ commandDialog cmdD = new commandDialog(this, true);
         }
         
         if (code == evt.VK_F1) {
+            yomiageWebMode = false;
             JavaSh.talkNoWait("目次");
 //            String url = JavaSh.url[0];
             //String url = JavaSh.mainPage;
@@ -840,6 +842,7 @@ commandDialog cmdD = new commandDialog(this, true);
             //    webAccess(url);
             //}
             jMenuItemMokujiActionPerformed(null);
+            textMain.setCaretPosition(mokujiPos);
         }
         if (code == evt.VK_F2) {
             JavaSh.talkNoWait("リンク");
@@ -952,6 +955,7 @@ commandDialog cmdD = new commandDialog(this, true);
             if (mode.equals("edit")) {
                 return;
             }
+            mokujiPos = textMain.getCaretPosition();
             String cmd = getLine();
             textMain.append("\n");
             System.err.println(cmd);
