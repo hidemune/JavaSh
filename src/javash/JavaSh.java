@@ -146,7 +146,7 @@ public static String mainPage = "";
     public static String linkConv(String str, boolean lineControl) {
         System.err.println("linkConv:" + frmTerminal.linkLanstLineNo);
         System.out.println(str);
-        if (frmTerminal.yomiageWebMode) {
+        //if (frmTerminal.yomiageWebMode) {
             //URL省略
             Pattern pattern3 = Pattern.compile("\\[\\[\\[.+?\\]\\]\\]");
             
@@ -169,7 +169,7 @@ public static String mainPage = "";
                 }
             }
             //System.out.println(str);
-        }
+        //}
         return str;
     }
     public static void talkNoWait(String str) {
@@ -212,13 +212,13 @@ public static String mainPage = "";
         //OpenJTalkインストール済みかチェック
         File file = new File(talkExec);
         if (!file.exists()){
-            frmT.append("OpenJTalkがインストールされていません。\n音声出力がOFFに設定されます。\n");
+            frmT.append("OpenJTalk is not installed.\naudio output is set to OFF.\n");
             talkExec = "";
             return;
         }
         File file2 = new File(talkEnExec);
         if (!file2.exists()){
-            frmT.append("flite_hts_engineがインストールされていません。\n音声出力がOFFに設定されます。\n");
+            frmT.append("flite_hts_engine is not installed.\naudio output is set to OFF.\n");
             talkEnExec = "";
             return;
         }
@@ -345,14 +345,14 @@ public static String mainPage = "";
                         //そのパスは、本当に実在するか、フォルダかどうかチェック。
                         File dir = new File(path);
                         if (!dir.exists()) {
-                            msg = "そのようなフォルダは存在しません。" + path;
+                            msg = "Such a folder does not exist." + path;
                             frmT.append(msg);
                             frmT.append("\n");
                             JavaSh.talk(msg);
                             return;
                         }
                         if (!dir.isDirectory()) {
-                            msg = "ディレクトリではありません。" + path;
+                            msg = "Not a directory." + path;
                             frmT.append(msg);
                             frmT.append("\n");
                             JavaSh.talk(msg);
@@ -360,7 +360,7 @@ public static String mainPage = "";
                         }
                         pwd = dir.getAbsolutePath();
                     }
-                    frmT.append("以上です。\n");
+                    frmT.append("It's all.\n");
                     frmT.setCaretPos(0);
                     return;
                 } 
@@ -433,11 +433,11 @@ public static String mainPage = "";
                     isT.close();
                     osT.close();
                     running = false;
-                    frmT.append("以上です。\n");
+                    frmT.append("It's all.\n");
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();
-                talk("エラーです。");
+                talk("Error");
                 //frmT.append(ex.toString());
                 //frmT.append("\n");
                 //frmT.repaintReq();
@@ -522,10 +522,10 @@ public static String mainPage = "";
                 
                 br.close();
                 frmT.execTrd.esT.close();
-                System.out.println("ErrorThreadは終了しました。");
+                System.out.println("ErrorThread has ended.");
             } catch (IOException ex) {
                 ex.printStackTrace();
-                talk("エラーです。");
+                talk("Error");
                 frmT.append(ex.toString());
                 frmT.append("\n");
                 frmT.repaintReq();

@@ -92,7 +92,7 @@ int mokujiPos = 0;
             
             //bwC.close();
             
-            //JavaSh.talk("保存しました。");
+            //JavaSh.talk("Saved");
         } catch (Exception e) {
             e.printStackTrace();
             return;
@@ -703,7 +703,7 @@ int mokujiPos = 0;
     }// </editor-fold>//GEN-END:initComponents
 
     private void formWindowGainedFocus(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowGainedFocus
-        //JavaSh.talk("ターミナルがフォーカスを得ました。");
+        //JavaSh.talk("Terminal has been the focus.");
     }//GEN-LAST:event_formWindowGainedFocus
 
     public void talkKeyPressed(java.awt.event.KeyEvent evt) {
@@ -722,16 +722,16 @@ int mokujiPos = 0;
         //カーソルキーは、シフトキーを押しているときは喋らせない
         if (((evt.getModifiers() & InputEvent.CTRL_MASK) == 0) && ((evt.getModifiers() & InputEvent.SHIFT_MASK) == 0)) {
             if (code == evt.VK_UP) {
-                JavaSh.talkNoWait("うえ");
+                JavaSh.talkNoWait("up");
             }
             if (code == evt.VK_DOWN) {
-                JavaSh.talkNoWait("した");
+                JavaSh.talkNoWait("down");
             }
             if (code == evt.VK_LEFT) {
-                JavaSh.talkNoWait("ひだり");
+                JavaSh.talkNoWait("left");
             }
             if (code == evt.VK_RIGHT) {
-                JavaSh.talkNoWait("みぎ");
+                JavaSh.talkNoWait("right");
             }
         } 
         
@@ -739,14 +739,14 @@ int mokujiPos = 0;
             if (code == evt.VK_LEFT) {
                 if (yomiageWebMode) {
                     if (urlRireki.size() <= 1) {
-                        JavaSh.talkNoWait("ページの履歴がありません。");
+                        JavaSh.talkNoWait("There is no history of the page.");
                         return;
                     }
-                    JavaSh.talkNoWait("前のページに移動します。");
+                    JavaSh.talkNoWait("I will move to the previous page.");
                     try {
                         urlRireki.remove(urlRireki.size()-1);
                         String url = urlRireki.get(urlRireki.size()-1);
-                        System.err.println("前のページ：" + url);
+                        System.err.println("previous page：" + url);
                         urlRireki.remove(urlRireki.size()-1);
                         if (!url.equals("")) {
                             webAccess(url);
@@ -772,7 +772,7 @@ int mokujiPos = 0;
                         //System.out.println(line);
                         JavaSh.talkNoWait(line);
                     } else {
-                        JavaSh.talkNoWait("以上です。");
+                        JavaSh.talkNoWait("It is not any more.");
                         //textMain.setSelectionEnd(textMain.getText().length());
                         //textMain.setSelectionStart(textMain.getText().length());
                         textMain.setCaretPosition(textMain.getText().length());
@@ -796,7 +796,7 @@ int mokujiPos = 0;
                         //System.out.println(line);
                         JavaSh.talkNoWait(line);
                     } else {
-                        JavaSh.talkNoWait("以上です。");
+                        JavaSh.talkNoWait("It is not any more.");
                         //textMain.setSelectionEnd(textMain.getText().length());
                         //textMain.setSelectionStart(textMain.getText().length());
                         textMain.setCaretPosition(0);
@@ -806,19 +806,19 @@ int mokujiPos = 0;
             }
         }
         if (code == evt.VK_CONTROL) {
-            JavaSh.talkNoWait("コントロール");
+            JavaSh.talkNoWait("control");
         }
         if (code == evt.VK_SHIFT) {
-            JavaSh.talkNoWait("シフト");
+            JavaSh.talkNoWait("shift");
         }
         if (code == evt.VK_ALT) {
-            JavaSh.talkNoWait("アルト");
+            JavaSh.talkNoWait("alt");
         }
         if (code == evt.VK_KANJI) {
-            JavaSh.talkNoWait("全角半角");
+            JavaSh.talkNoWait("kanji");
         }
         if (code == evt.VK_TAB) {
-            JavaSh.talkNoWait("タブ");
+            JavaSh.talkNoWait("tab");
         }
         
         //F1-F10 セット 但し、前の行を読み上げた直後は行わない。
@@ -826,7 +826,7 @@ int mokujiPos = 0;
         if ((evt.VK_F2 == code)) {
             int nowL = getLineNo();
             if ((linkLanstLineNo != nowL - 1) && (linkLanstLineNo != nowL)) {
-                System.out.println("リンクを退避：" + nowL);
+                System.out.println("save the link:" + nowL);
                 String str = getLine();
                 JavaSh.linkConv(str, true);
             }
@@ -834,7 +834,7 @@ int mokujiPos = 0;
         
         if (code == evt.VK_F1) {
             yomiageWebMode = false;
-            JavaSh.talkNoWait("目次");
+            JavaSh.talkNoWait("Table of contents");
 //            String url = JavaSh.url[0];
             //String url = JavaSh.mainPage;
             //System.err.println(url);
@@ -845,7 +845,7 @@ int mokujiPos = 0;
             textMain.setCaretPosition(mokujiPos);
         }
         if (code == evt.VK_F2) {
-            JavaSh.talkNoWait("リンク");
+            JavaSh.talkNoWait("Link");
             String url = JavaSh.url[0];
             if (!url.equals("")) {
                 webAccess(url);
@@ -860,61 +860,61 @@ int mokujiPos = 0;
             WebActionPerformed(null);
         }
         if (code == evt.VK_F4) {
-            JavaSh.talkNoWait("現在のカーソル位置は" + getLineNo() + "行目です。");
+            JavaSh.talkNoWait("The current cursor position is " + getLineNo() + " line.");
         }
         if (code == evt.VK_F5) {
             cmdD.setText("");
-            JavaSh.talkNoWait("現在のカーソル位置は" + getLineNo() + "行目です。移動したい行番号を入力してエンターを押してください。");
+            JavaSh.talkNoWait("The current cursor position is " + getLineNo() + "line.Please press enter to enter the line number you want to move.");
             cmdD.setVisible(true);
             String str = cmdD.getText();
             try {
                 int wk = Integer.parseInt(str);
                 setLineNo(wk);
-                JavaSh.talkNoWait(getLineNo() + "行目に移動しました。");
+                JavaSh.talkNoWait("I have been moved to the line " + getLineNo());
             } catch (Exception e) {
-                JavaSh.talkNoWait("数値以外が入力されましたので何もしません。");
+                JavaSh.talkNoWait("It does not do anything non-numeric, so was entered.");
             }
         }
         if (code == evt.VK_F6) {
-            JavaSh.talkNoWait("エフ6");
+            JavaSh.talkNoWait("F6");
             //String url = JavaSh.url[5];
             //if (!url.equals("")) {
             //    webAccess(url);
             //}
         }
         if (code == evt.VK_F7) {
-            JavaSh.talkNoWait("エフ7");
+            JavaSh.talkNoWait("F7");
             //String url = JavaSh.url[6];
             //if (!url.equals("")) {
             //    webAccess(url);
             //}
         }
         if (code == evt.VK_F8) {
-            JavaSh.talkNoWait("エフ8");
+            JavaSh.talkNoWait("F8");
             //String url = JavaSh.url[7];
             //if (!url.equals("")) {
             //    webAccess(url);
             //}
         }
         if (code == evt.VK_F9) {
-            JavaSh.talkNoWait("エフ9");
+            JavaSh.talkNoWait("F9");
             //String url = JavaSh.url[8];
             //if (!url.equals("")) {
             //    webAccess(url);
             //}
         }
         if (code == evt.VK_F10) {
-            JavaSh.talkNoWait("エフ10");
+            JavaSh.talkNoWait("F10");
             //String url = JavaSh.url[9];
             //if (!url.equals("")) {
             //    webAccess(url);
             //}
         }
         if (code == evt.VK_F11) {
-            JavaSh.talkNoWait("エフ11");
+            JavaSh.talkNoWait("F11");
         }
         if (code == evt.VK_F12) {
-            JavaSh.talkNoWait("エフ12");
+            JavaSh.talkNoWait("F12");
         }
     }
     public void webAccess(String url) {
@@ -931,10 +931,10 @@ int mokujiPos = 0;
         //チュートリアル専用メッセージ
         if (false) {
             if (keyCode == evt.VK_ESCAPE) {
-                JavaSh.talkNoWait("エスケープ。これを押して、カーソルのある行の内容を読み上げます。");
+                JavaSh.talkNoWait("escape");
             }
             if (keyCode == evt.VK_SPACE) {
-                JavaSh.talkNoWait("スペース");
+                JavaSh.talkNoWait("space");
             }
         } else {
             //選択行の読み上げ
@@ -961,13 +961,13 @@ int mokujiPos = 0;
             System.err.println(cmd);
             //コマンドの実行処理
             if (cmd.contains("reboot")) {
-                JavaSh.talk("リブート処理は、まだ実装されていません。");
+                JavaSh.talk("It is not yet implemented.");
             }
             if (cmd.contains("shutdown")) {
-                JavaSh.talk("シャットダウン処理は、まだ実装されていません。");
+                JavaSh.talk("It is not yet implemented.");
             }
             if (cmd.contains("login")) {
-                JavaSh.talk("ログイン処理は、実装されていません。");
+                JavaSh.talk("It is not yet implemented.");
             }
             
             String[] cmdA = cmd.split(" ");
@@ -975,7 +975,7 @@ int mokujiPos = 0;
             if (cmdA[0].equals("edit")) {
                 //ファイル編集モード
                 mode = "edit";
-                JavaSh.talkNoWait("編集モードに移行します。保存はコントロールエス、中止はコントロールエックスです。");
+                JavaSh.talkNoWait("I will edit mode. Save Control S, stop The Control X.");
                 String filename = "tmp.txt";
                 try {
                     filename = cmdA[1];
@@ -1006,7 +1006,7 @@ int mokujiPos = 0;
       /*      if (execTrd.running) {
                 textMain.setText("\n" + execTrd.getCmd());
                 append("強制終了\n");
-                JavaSh.talk("強制終了");
+                JavaSh.talk("Forced termination");
                 mode = "";
                 execTrd.running = false;
                 execTrd.process.destroy();
@@ -1021,7 +1021,7 @@ int mokujiPos = 0;
                 textMain.setText(mode);
                 append("\n");
                 append("強制終了\n");
-                JavaSh.talk("強制終了");
+                JavaSh.talk("Forced termination");
                 mode = "";
                 setLineNo(0);
        //     }
@@ -1029,8 +1029,8 @@ int mokujiPos = 0;
         if (((evt.getModifiers() & InputEvent.CTRL_MASK) != 0) && (evt.getKeyCode() == evt.VK_S)) {
             if (mode.equals("edit")) {
                 writeFile();
-                append("編集を終了しました。\n");
-                JavaSh.talk("編集を終了しました。");
+                append("I've finished editing.\n");
+                JavaSh.talk("I've finished editing.");
                 mode = "";
             }
         }
@@ -1066,7 +1066,7 @@ int mokujiPos = 0;
         if (!fl.exists()) {
             fl = new File(fullPath);
             if (!fl.exists()) {
-                JavaSh.talk("そのようなファイルはありません。中止はコントロールエックスです。");
+                JavaSh.talk("There is no such file. Stop is a control X.");
             }
         }
         filenameBk = fl.getAbsolutePath();
@@ -1112,7 +1112,7 @@ int mokujiPos = 0;
             
             bw.close();
             
-            JavaSh.talk("保存しました。");
+            JavaSh.talk("Saved");
         } catch (Exception e) {
             e.printStackTrace();
             return;
@@ -1169,15 +1169,15 @@ int mokujiPos = 0;
 
     private void jMenuItem6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem6ActionPerformed
         StringBuilder sb = new StringBuilder();
-        sb.append("ヘルプです。現在カーソルは１行目にあります。エスケープキーで１行ずつ喋ります。\n");
-        sb.append("コマンドを入力してエンターを押すと、そのコマンドが実行できます。\n");
-        sb.append("コマンドの中止はコントロールエックスです。\n");
-        sb.append("使い方の例を、以下に記述します。\n");
-        sb.append("エルエスと入力してエンターを押すとファイルの一覧が出ます。\n");
-        sb.append("上下のキーで移動しながら、エスケープを押してファイル名を確認します。\n");
-        sb.append("行頭にエディットと英語で入れて、スペースを入力してエンターを押します。\n");
-        sb.append("すると、そのファイルが編集できます。\n");
-        sb.append("使い方の例は、以上です。\n");
+        sb.append("This is a help. Is located in the first line current cursor. I will speak one line in the escape key.\n");
+        sb.append("When you press the Enter by entering the command, you can run the command.\n");
+        sb.append("Discontinuation of command is a control X.\n");
+        sb.append("I will describe below, is an example of how to use.\n");
+        sb.append("A list of files appears when you press the Enter by typing ls\n");
+        sb.append("While moving in the up and down keys, check the file name by pressing the escape.\n");
+        sb.append("Put the edit and space at the beginning of the line, and press enter.\n");
+        sb.append("Then, the file can be edited.\n");
+        sb.append("Example of usage is over.\n");
         textMain.setText(sb.toString());
         textMain.setCaretPosition(0);
         java.awt.event.KeyEvent evtT = new java.awt.event.KeyEvent(this, 0, 0, KeyEvent.SHIFT_DOWN_MASK, KeyEvent.VK_ESCAPE);
@@ -1189,51 +1189,51 @@ int mokujiPos = 0;
         //NetClass net = new NetClass();
         //net.NetClass("http://www.yahoo.co.jp/", textMain);
         textMain.setText("yahoo ");
-        JavaSh.talkNoWait("検索したい単語を入力してエンターを押して下さい。");
+        JavaSh.talkNoWait("Press the Enter by entering the word you want to search.");
     }//GEN-LAST:event_WebActionPerformed
 
     private void jMenu1FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jMenu1FocusGained
-        JavaSh.talk("ファイルメニュー");
+        JavaSh.talk("file menu");
     }//GEN-LAST:event_jMenu1FocusGained
 
     private void jMenuItem4FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jMenuItem4FocusGained
-        JavaSh.talk("保存");
+        JavaSh.talk("save");
     }//GEN-LAST:event_jMenuItem4FocusGained
 
     private void jMenuItem5FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jMenuItem5FocusGained
-        JavaSh.talk("中止");
+        JavaSh.talk("cancel");
     }//GEN-LAST:event_jMenuItem5FocusGained
 
     private void jMenuItem1FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jMenuItem1FocusGained
-        JavaSh.talk("終了");
+        JavaSh.talk("end");
     }//GEN-LAST:event_jMenuItem1FocusGained
 
     private void jMenu2FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jMenu2FocusGained
-        JavaSh.talk("エディットメニュー");
+        JavaSh.talk("edit menu");
     }//GEN-LAST:event_jMenu2FocusGained
 
     private void jMenuItem2FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jMenuItem2FocusGained
-        JavaSh.talk("辞書編集");
+        JavaSh.talk("edit Dictionary");
     }//GEN-LAST:event_jMenuItem2FocusGained
 
     private void jMenuItem3FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jMenuItem3FocusGained
-        JavaSh.talk("辞書再読込");
+        JavaSh.talk("reload Dictionary");
     }//GEN-LAST:event_jMenuItem3FocusGained
 
     private void jMenu3FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jMenu3FocusGained
-        JavaSh.talk("ヘルプメニュー");
+        JavaSh.talk("help menu");
     }//GEN-LAST:event_jMenu3FocusGained
 
     private void jMenuItem6FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jMenuItem6FocusGained
-        JavaSh.talk("ヘルプ");
+        JavaSh.talk("help");
     }//GEN-LAST:event_jMenuItem6FocusGained
 
     private void jMenu4FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jMenu4FocusGained
-        JavaSh.talk("拡張機能メニュー");
+        JavaSh.talk("Extension menu");
     }//GEN-LAST:event_jMenu4FocusGained
 
     private void WebFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_WebFocusGained
-        JavaSh.talk("ウェブ");
+        JavaSh.talk("web");
     }//GEN-LAST:event_WebFocusGained
 
     private void WebAboutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_WebAboutActionPerformed

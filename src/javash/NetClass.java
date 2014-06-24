@@ -144,7 +144,7 @@ public class NetClass {
         str = str.replaceAll("\n\n*", "\n");
         
         java.awt.Toolkit.getDefaultToolkit().beep();
-        textP.setText("\n" + str + "\n以上です。\n");
+        textP.setText("\n" + str + "\nIt's all.\n");
         textP.setCaretPosition(0);
         
     }catch(Exception e){
@@ -267,7 +267,7 @@ public class NetClass {
         str = str.replaceAll("\n\n*", "\n");
         
         java.awt.Toolkit.getDefaultToolkit().beep();
-        textP.setText("\n" + str + "\n以上です。\n");
+        textP.setText("\n" + str + "\nIt's all.\n");
         textP.setCaretPosition(0);
         
     }catch(Exception e){
